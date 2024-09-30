@@ -12,11 +12,11 @@ class Menu extends CI_Controller {
 		$this->load->library('upload');
 
 		// Pastikan pengguna sudah login
-		// if (!$this->session->userdata('logged_in') == 1) {
-		// 	redirect('auth');
-		// } else {
-		// 	redirect('');
-		// }
+		if (!$this->session->userdata('logged_in') == 1) {
+			redirect('auth');
+		} else {
+			redirect('');
+		}
 	}
 
 	public function sop_request()

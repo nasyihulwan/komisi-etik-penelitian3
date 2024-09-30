@@ -71,7 +71,7 @@
                         <ul>
                             <li>
                                 <a class="nav-link scrollto <?= $page=='home' ? 'active' : '' ?>"
-                                    href="<?= base_url() ?>">Sejarah</a>
+                                    href="<?= base_url('sejarah') ?>">Sejarah</a>
                             </li>
                             <li>
                                 <a href="<?= base_url('struktur_organisasi') ?>">Struktur Organisasi</a>
@@ -86,7 +86,6 @@
                             <li><a href="<?= base_url('tarif') ?>">Tarif</a></li>
                             <li><a href="#">Estimasi Waktu</a></li>
                             <li><a href="#">Reviewer</a></li>
-                            <li><a href="#">Persyaratan Etik</a></li>
                             <li><a href="#">Prosedur Alur Perpanjangan Surat Pernyataan Etik</a></li>
                             <li><a href="#">Panduan Pengguna Lupa Password</a></li>
                         </ul>
@@ -95,9 +94,15 @@
                                 class="bi bi-chevron-down"></i></a>
                         <ul>
 
-                            <li><a href="#">Penelitian dengan Manusia</a></li>
-                            <li><a href="#">Penelitian dengan Hewan</a></li>
-                            <li><a href="#">Penelitian Humaniora</a></li>
+                            <li><a href="<?= base_url() ?>assets/file/Formulir Pengajuan Telaah Etik Baru Fix.docx"
+                                    download>Formulir Pengajuan Telaah Etik Baru</a>
+                            </li>
+                            <li><a href="<?= base_url() ?>assets/file/Formulir Pernyataan Pendanaan.docx">Formulir
+                                    Pernyataan
+                                    Pendanaan</a>
+                            </li>
+                            <li><a href="<?= base_url() ?>assets/file/KOMITMEN ETIK PENELITIAN.docx">Komitmen Etik
+                                    Penelitian</a></li>
                         </ul>
                     </li>
                     <li class="dropdown"><a href="#"><span>Referensi</span> <i class="bi bi-chevron-down"></i></a>

@@ -87,7 +87,6 @@
                             <li><a href="<?= base_url('tarif') ?>">Tarif</a></li>
                             <li><a href="#">Estimasi Waktu</a></li>
                             <li><a href="#">Reviewer</a></li>
-                            <li><a href="#">Persyaratan Etik</a></li>
                             <li><a href="#">Prosedur Alur Perpanjangan Surat Pernyataan Etik</a></li>
                             <li><a href="#">Panduan Pengguna Lupa Password</a></li>
                         </ul>
