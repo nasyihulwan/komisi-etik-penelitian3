@@ -126,6 +126,12 @@
                     </li>
                     <?php endif ?>
 
+                    <?php if($this->session->userdata('level') == 'superadmin' || $this->session->userdata('level') == 'petugas'): ?>
+                    <li>
+                        <a class="nav-link scrollto" href="#">Validasi Formulir</a>
+                    </li>
+                    <?php endif ?>
+
                     <?php if($this->session->userdata('level') == 'member'): ?>
                     <li class="dropdown"><a href="#"><span><?= $this->session->userdata('nama') ?></span> <i
                                 class="bi bi-chevron-down"></i></a>
@@ -133,8 +139,8 @@
                             <li><a href="<?= base_url('auth/logout') ?>">Logout</a></li>
                         </ul>
                     </li>
-                    <?php elseif($this->session->userdata('level') == 'admin'): ?>
-                    <li class="dropdown"><a href="#"><span>Admin</span> <i class="bi bi-chevron-down"></i></a>
+                    <?php elseif($this->session->userdata('level') == 'superadmin'): ?>
+                    <li class="dropdown"><a href="#"><span>Superadmin</span> <i class="bi bi-chevron-down"></i></a>
                         <ul>
                             <li><a href="<?= base_url('auth/logout') ?>">Logout</a></li>
                         </ul>

@@ -39,7 +39,7 @@
                                         <input type="text"
                                             class="form-control <?= $this->session->flashdata('judul_invalid')||form_error('judul') ? 'is-invalid' : ''; ?>"
                                             id="judul" name="judul" placeholder="Judul Penelitian"
-                                            value="<?= set_value('judul'); ?>" disabled>
+                                            value="<?= set_value('judul'); ?>">
                                         <div class="invalid-feedback">
                                             <?= $this->session->flashdata('judul_invalid'); ?>
                                             <?= form_error('judul'); ?>
@@ -56,7 +56,7 @@
                                         <select
                                             class="form-select <?= $this->session->flashdata('kategori_invalid') ? 'is-invalid' : ''; ?>"
                                             id="kategori" name="kategori" aria-label="Floating label select example">
-                                            <option <?= empty(set_value('kategori')) ? 'selected' : '' ?> disabled>Pilih
+                                            <option <?= empty(set_value('kategori')) ? 'selected' : '' ?>>Pilih
                                             </option>
                                             <option <?= set_value('kategori')=='Etik Uji Hewan' ? 'selected' : '' ?>
                                                 value="Etik Uji Hewan">Etik Uji Hewan</option>
@@ -82,7 +82,7 @@
                                             class="form-select <?= $this->session->flashdata('sumber_dana_invalid') ? 'is-invalid' : ''; ?>"
                                             id="sumber_dana" name="sumber_dana"
                                             aria-label="Floating label select example">
-                                            <option <?= empty(set_value('sumber_dana')) ? 'selected' : '' ?> disabled>
+                                            <option <?= empty(set_value('sumber_dana')) ? 'selected' : '' ?>>
                                                 Pilih</option>
                                             <option <?= set_value('sumber_dana')=='Mandiri' ? 'selected' : '' ?>
                                                 value="Mandiri">Penelitian mandiri dan tidak didanai dari manapun (S1,
@@ -108,7 +108,7 @@
                                             class="form-select <?= $this->session->flashdata('pemberi_hibah_invalid') ? 'is-invalid' : ''; ?>"
                                             id="pemberi_hibah" name="pemberi_hibah"
                                             aria-label="Floating label select example">
-                                            <option <?= empty(set_value('pemberi_hibah')) ? 'selected' : '' ?> disabled>
+                                            <option <?= empty(set_value('pemberi_hibah')) ? 'selected' : '' ?>>
                                                 Pilih</option>
                                             <option <?= set_value('pemberi_hibah')=='Pemerintah' ? 'selected' : '' ?>
                                                 value="Pemerintah">Pemerintah</option>
@@ -138,7 +138,7 @@
                                         <input
                                             class="form-control <?= $this->session->flashdata('surat_pernyataan_mandiri_invalid') ? 'is-invalid' : ''; ?>"
                                             type="file" id="surat_pernyataan_mandiri" name="surat_pernyataan_mandiri"
-                                            accept="application/pdf" disabled>
+                                            accept="application/pdf">
                                         <div class="invalid-feedback">
                                             <?= $this->session->flashdata('surat_pernyataan_mandiri_invalid'); ?>
                                         </div>
@@ -153,8 +153,8 @@
                                         <label for="formulir_etik" class="form-label">Upload Formulir Etik</label>
                                         <input
                                             class="form-control <?= $this->session->flashdata('formulir_etik_invalid') ? 'is-invalid' : ''; ?>"
-                                            type="file" id="formulir_etik" name="formulir_etik" accept="application/pdf"
-                                            disabled>
+                                            type="file" id="formulir_etik" name="formulir_etik"
+                                            accept="application/pdf">
                                         <div class="invalid-feedback">
                                             <?= $this->session->flashdata('formulir_etik_invalid'); ?>
                                         </div>
@@ -170,7 +170,7 @@
                                             tujuan, prosedur penelitian dan instrumen)</label>
                                         <input
                                             class="form-control <?= $this->session->flashdata('proposal_invalid') ? 'is-invalid' : ''; ?>"
-                                            type="file" id="proposal" name="proposal" accept="application/pdf" disabled>
+                                            type="file" id="proposal" name="proposal" accept="application/pdf">
                                         <div class="invalid-feedback">
                                             <?= $this->session->flashdata('proposal_invalid'); ?>
                                         </div>
@@ -186,7 +186,7 @@
                                         <input
                                             class="form-control <?= $this->session->flashdata('bukti_pembayaran_invalid') ? 'is-invalid' : ''; ?>"
                                             type="file" id="bukti_pembayaran" name="bukti_pembayaran"
-                                            accept="application/pdf,image/*" disabled>
+                                            accept="application/pdf,image/*">
                                         <div class="invalid-feedback">
                                             <?= $this->session->flashdata('bukti_pembayaran_invalid'); ?>
                                         </div>
@@ -198,8 +198,7 @@
                             </div>
                             <div class="text-center">
                                 <?= $this->session->flashdata('success') ? '<script>alert("Berhasil submit")</script>' : ''; ?>
-                                <button type="submit" class="btn btn-danger" disabled><i
-                                        class="bi bi-pencil-square"></i>
+                                <button type="submit" class="btn btn-danger"><i class="bi bi-pencil-square"></i>
                                     Submit</button>
                             </div>
                         </form>

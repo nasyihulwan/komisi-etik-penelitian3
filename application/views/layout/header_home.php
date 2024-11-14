@@ -10,8 +10,8 @@
     <meta content="" name="keywords">
 
     <!-- Favicons -->
-    <link href="<?= base_url() ?>assets/img/favicon.ico" rel="icon">
-    <link href="<?= base_url() ?>assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+    <link href="<?= base_url('assets/img/favicon.ico') ?>" rel="icon">
+    <link href="<?= base_url('assets/img/apple-touch-icon.png') ?>" rel="apple-touch-icon">
 
     <!-- Google Fonts -->
     <link
@@ -19,16 +19,16 @@
         rel="stylesheet">
 
     <!-- Vendor CSS Files -->
-    <link href="<?= base_url() ?>assets/vendor/aos/aos.css" rel="stylesheet">
-    <link href="<?= base_url() ?>assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="<?= base_url() ?>assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-    <link href="<?= base_url() ?>assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
-    <link href="<?= base_url() ?>assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
-    <link href="<?= base_url() ?>assets/vendor/remixicon/remixicon.css" rel="stylesheet">
-    <link href="<?= base_url() ?>assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+    <link href="<?= base_url('assets/vendor/aos/aos.css') ?>" rel="stylesheet">
+    <link href="<?= base_url('assets/vendor/bootstrap/css/bootstrap.min.css') ?>" rel="stylesheet">
+    <link href="<?= base_url('assets/vendor/bootstrap-icons/bootstrap-icons.css') ?>" rel="stylesheet">
+    <link href="<?= base_url('assets/vendor/boxicons/css/boxicons.min.css') ?>" rel="stylesheet">
+    <link href="<?= base_url('assets/vendor/glightbox/css/glightbox.min.css') ?>" rel="stylesheet">
+    <link href="<?= base_url('assets/vendor/remixicon/remixicon.css') ?>" rel="stylesheet">
+    <link href="<?= base_url('assets/vendor/swiper/swiper-bundle.min.css') ?>" rel="stylesheet">
 
     <!-- Template Main CSS File -->
-    <link href="<?= base_url() ?>assets/css/style.css" rel="stylesheet">
+    <link href="<?= base_url('assets/css/style.css') ?>" rel="stylesheet">
 
     <!-- =======================================================
   * Template Name: Bootslander
@@ -41,13 +41,12 @@
 
 <body>
     <!-- ======= Header ======= -->
-    <header id="header" class="fixed-top d-flex align-items-center header-transparent">
+    <header id="header" class="fixed-top d-flex align-items-center">
         <div class="container d-flex align-items-center justify-content-between">
 
             <div class="logo">
-                <!-- <h1><a href="index.html"><span>Mahesa Surandana</span></a></h1> -->
-                <!-- Uncomment below if you prefer to use an image logo -->
-                <a href="<?= base_url('') ?>"><img src="assets/img/UPI-Logo-white.png" alt="" class="img-fluid"></a>
+                <a href="<?= base_url() ?>"><img src="<?= base_url() ?>assets/img/UPI-Logo-white.png" alt=""
+                        class="img-fluid"></a>
             </div>
 
             <nav id="navbar" class="navbar">
@@ -127,6 +126,12 @@
                     </li>
                     <?php endif ?>
 
+                    <?php if($this->session->userdata('level') == 'superadmin' || $this->session->userdata('level') == 'petugas'): ?>
+                    <li>
+                        <a class="nav-link scrollto" href="#">Validasi Formulir</a>
+                    </li>
+                    <?php endif ?>
+
                     <?php if($this->session->userdata('level') == 'member'): ?>
                     <li class="dropdown"><a href="#"><span><?= $this->session->userdata('nama') ?></span> <i
                                 class="bi bi-chevron-down"></i></a>
@@ -134,8 +139,8 @@
                             <li><a href="<?= base_url('auth/logout') ?>">Logout</a></li>
                         </ul>
                     </li>
-                    <?php elseif($this->session->userdata('level') == 'admin'): ?>
-                    <li class="dropdown"><a href="#"><span>Admin</span> <i class="bi bi-chevron-down"></i></a>
+                    <?php elseif($this->session->userdata('level') == 'superadmin'): ?>
+                    <li class="dropdown"><a href="#"><span>Superadmin</span> <i class="bi bi-chevron-down"></i></a>
                         <ul>
                             <li><a href="<?= base_url('auth/logout') ?>">Logout</a></li>
                         </ul>
@@ -159,4 +164,4 @@
             </nav><!-- .navbar -->
 
         </div>
-    </header><!-- End Header -->
+    </header>

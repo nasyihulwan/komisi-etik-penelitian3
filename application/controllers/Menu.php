@@ -9,13 +9,12 @@ class Menu extends CI_Controller {
 		$this->load->library('session');
 		$this->load->helper(array('form', 'url'));
 		$this->load->model('menu_model');
+		$this->load->model('validasiformulir_model');
 		$this->load->library('upload');
 
 		// Pastikan pengguna sudah login
 		if (!$this->session->userdata('logged_in') == 1) {
 			redirect('auth');
-		} else {
-			redirect('');
 		}
 	}
 
@@ -40,11 +39,11 @@ class Menu extends CI_Controller {
 			$this->load->view('menu/sop_request');
 			$this->load->view('layout/footer_menu');
 		} else {
-			$this->sop_process();
+			$this->_sop_process();
 		}
 	}
 
-	private function sop_process() {
+	private function _sop_process() {
 		$judul = $this->input->post('judul');
 		$kategori = $this->input->post('kategori');
 		$sumber_dana = $this->input->post('sumber_dana');
@@ -101,5 +100,19 @@ class Menu extends CI_Controller {
 
 		redirect('menu/sop_request');
 
+	}
+
+	public function validasi_formulir()
+	{
+		$data['page'] = 'validasi_formulir';
+		if($this->session->userdata('level') == 'superadmin' || $this->session->userdata('level') == 'petugas')
+		{	
+			$data['query'] = $this->validasiformulir_model->queryAll();
+		} else if ($this->session->userdata('level') == 'member') {
+			$data['query'] = $this->validasiformulir_model->querySelf();
+		}
+		$this->load->view('layout/header_menu', $data);
+		$this->load->view('menu/validasi_formulir');
+		$this->load->view('layout/footer_menu');
 	}
 }

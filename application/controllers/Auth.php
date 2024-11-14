@@ -71,8 +71,7 @@ class Auth extends CI_Controller {
 					'org' => $cek_akun['org'],
 					'kota' => $cek_akun['kota'],
 					'negara' => $cek_akun['negara'],
-					'kota' => $cek_akun['kota'],
-					'level' => 'member',
+					'level' => $cek_akun['level'],
 					'logged_in' => 1
 				];
 				// Jika Berhasil, simpan data ke session
@@ -84,8 +83,6 @@ class Auth extends CI_Controller {
 				return redirect(base_url('auth'))->withInput();
 			}
 		}
-		var_dump($cek_akun);
-		die;
 	}
 
 	public function user_registration()
