@@ -37,6 +37,11 @@
   * Author: BootstrapMade.com
   * License: https://bootstrapmade.com/license/
   ======================================================== -->
+    <style>
+    .section-title {
+        margin-bottom: 0 !important;
+    }
+    </style>
 </head>
 
 <body>
