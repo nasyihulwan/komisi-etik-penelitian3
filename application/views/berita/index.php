@@ -22,8 +22,12 @@
 <section id="website" class="website">
     <div class="container mt-4">
         <div class="row">
-            <div class="section-title" data-aos="fade-up">
-                <h2 class="mb-3">Berita</h2>
+            <!-- Kolom Berita -->
+            <div class="col-md-8">
+                <div class="section-title" data-aos="fade-up">
+                    <h2 class="mb-3">Berita</h2>
+                </div>
+
                 <!-- Looping Berita -->
                 <?php foreach ($berita as $b): ?>
                 <div class="col-md-12 mb-4">
@@ -39,7 +43,6 @@
                             <!-- Bagian Konten -->
                             <div class="col-md-8">
                                 <div class="card-body">
-                                    <!-- <span class="badge bg-info text-white mb-2">KABAR ISOLA</span> -->
                                     <h5 class="card-title">
                                         <a href="<?= site_url('berita/detail/' . $b['slug']); ?>"
                                             class="text-decoration-none text-dark">
@@ -62,8 +65,26 @@
                 </div>
                 <?php endforeach; ?>
             </div>
+
+            <!-- Kolom Arsip -->
+            <div class="col-md-4">
+                <div class="section-title" data-aos="fade-up">
+                    <h2 class="mb-3">Arsip Berita</h2>
+                </div>
+
+                <!-- Arsip Berita -->
+                <ul class="list-group">
+                    <?php foreach ($arsip as $row): ?>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="<?= site_url('berita/arsip/' . $row->periode); ?>"
+                            class="text-decoration-none text-dark">
+                            <?= $row->bulan_tahun; ?>
+                        </a>
+                        <span class="badge bg-primary rounded-pill"><?= $row->jumlah_berita; ?></span>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
         </div>
-
     </div>
-
-</section><!-- End Details Section -->
+</section>
