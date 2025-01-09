@@ -18,9 +18,7 @@ class Berita extends CI_Controller {
         
         $data['arsip'] = $this->Berita_model->getArsipBerita();
         
-        // Optional: Add error handling
         if (empty($data['berita'])) {
-            // Handle no results scenario
             $data['berita'] = [];
         }
         
