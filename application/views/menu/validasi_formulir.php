@@ -108,6 +108,14 @@
                                     }
                                 ?>
                                 <span class="<?= $statusClass ?>"><?= $r->status ?></span>
+
+                                <?php if ($r->status == "disetujui") { ?>
+                                <br><br>
+                                <span class="badge bg-info text-white" style="cursor: pointer;"
+                                    onclick="showApprovedFiles(<?= $r->id_sop ?>)">
+                                    Lihat File Persetujuan
+                                </span>
+                                <?php } ?>
                             </td>
                             <td class="text-center">
 
@@ -202,15 +210,17 @@ function showUpdatePopup(id_sop) {
                         <div class="form-text mb-3">
                             Jelaskan apa saja yang perlu diperbaiki
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="fileUpload" class="form-label">Upload File Pendukung (Maksimal 5 file)</label>
-                            <input type="file" class="form-control" id="fileUpload" multiple 
-                                accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
-                                onchange="validateFiles(this)">
-                            <div class="form-text">
-                                Format yang diizinkan: PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG (Maks. 2MB per file)
-                            </div>
+                    </div>
+                </div>
+
+                <div id="fileContainer" style="display:none;">
+                    <div class="mb-3">
+                        <label for="fileUpload" class="form-label">Upload File (Maksimal 5 file)</label>
+                        <input type="file" class="form-control" id="fileUpload" multiple 
+                            accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                            onchange="validateFiles(this)">
+                        <div class="form-text">
+                            Format yang diizinkan: PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG (Maks. 2MB per file)
                         </div>
                     </div>
                 </div>
@@ -230,13 +240,20 @@ function showUpdatePopup(id_sop) {
         didOpen: () => {
             document.getElementById('status').addEventListener('change', function(e) {
                 const pesanContainer = document.getElementById('pesanContainer');
+                const fileContainer = document.getElementById('fileContainer');
                 const pesan = document.getElementById('pesan');
 
                 if (e.target.value === 'belum diperbaiki') {
                     pesanContainer.style.display = 'block';
+                    fileContainer.style.display = 'block';
                     pesan.style.display = 'block';
+                } else if (e.target.value === 'disetujui') {
+                    pesanContainer.style.display = 'none';
+                    fileContainer.style.display = 'block';
+                    pesan.style.display = 'none';
                 } else {
                     pesanContainer.style.display = 'none';
+                    fileContainer.style.display = 'none';
                     pesan.style.display = 'none';
                 }
             });
@@ -252,11 +269,14 @@ function showUpdatePopup(id_sop) {
                 return false;
             }
 
-            if (status === "diperbaiki") {
-                if (pesan.trim() === "") {
-                    Swal.showValidationMessage('Harap isi pesan untuk status diperbaiki!');
-                    return false;
-                }
+            if (status === "belum diperbaiki" && pesan.trim() === "") {
+                Swal.showValidationMessage('Harap isi pesan untuk status diperbaiki!');
+                return false;
+            }
+
+            if (status === "disetujui" && files.length === 0) {
+                Swal.showValidationMessage('Harap upload file untuk status disetujui!');
+                return false;
             }
 
             return {
@@ -272,7 +292,6 @@ function showUpdatePopup(id_sop) {
             formData.append('status', result.value.status);
             formData.append('pesan', result.value.pesan);
 
-            // Append files
             const files = result.value.files;
             for (let i = 0; i < files.length; i++) {
                 formData.append('files[]', files[i]);
@@ -288,19 +307,13 @@ function showUpdatePopup(id_sop) {
                 })
                 .then(async response => {
                     const responseText = await response.text();
-                    console.log('Response status:', response.status);
-                    console.log('Response headers:', Object.fromEntries(response.headers));
-                    console.log('Raw response:', responseText);
-
                     if (!response.ok) {
                         throw new Error(
                             `HTTP error! status: ${response.status}, body: ${responseText}`);
                     }
-
                     try {
                         return JSON.parse(responseText);
                     } catch (e) {
-                        console.error('JSON Parse Error:', e);
                         throw new Error('Server response was not in JSON format');
                     }
                 })
@@ -335,7 +348,6 @@ function showUpdatePopup(id_sop) {
                         buttonsStyling: false
                     });
                 });
-
         }
     });
 }
@@ -391,6 +403,54 @@ function showMessage(message, id_sop) {
                 },
                 buttonsStyling: false,
                 confirmButtonText: 'Tutup',
+            });
+        });
+}
+
+
+function showApprovedFiles(id_sop) {
+    fetch(`<?= base_url('menu/get_disetujui_files/') ?>${id_sop}`)
+        .then(response => response.json())
+        .then(files => {
+            let filesHtml = '';
+            if (files.length > 0) {
+                filesHtml = '<div class="mt-4"><h6>File Disetujui:</h6><ul class="list-unstyled">';
+                files.forEach(file => {
+                    filesHtml += `
+                    <li class="mb-2">
+                        <a href="<?= base_url('uploads/disetujui_files/') ?>${file.file_name}" 
+                           target="_blank" class="btn btn-sm btn-outline-primary">
+                            ${file.original_name}
+                        </a>
+                    </li>`;
+                });
+                filesHtml += '</ul></div>';
+            } else {
+                filesHtml = '<div class="text-center">Tidak ada file yang tersedia</div>';
+            }
+
+            Swal.fire({
+                title: 'File yang Disetujui',
+                html: filesHtml,
+                icon: 'info',
+                customClass: {
+                    popup: 'swal2-popup-wide',
+                    confirmButton: 'btn btn-primary'
+                },
+                buttonsStyling: false,
+                confirmButtonText: 'Tutup'
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Gagal memuat file yang disetujui',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
             });
         });
 }

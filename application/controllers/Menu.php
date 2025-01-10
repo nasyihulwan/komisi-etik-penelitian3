@@ -144,12 +144,10 @@ class Menu extends CI_Controller {
         header('Content-Type: application/json');
         
         try {
-            // Verify AJAX request
             if (!$this->input->is_ajax_request()) {
                 throw new Exception('Invalid request method');
             }
 
-            // Get and validate input
             $id_sop = $this->input->post('id_sop');
             $status = $this->input->post('status');
             $pesan = $this->input->post('pesan');
@@ -158,10 +156,8 @@ class Menu extends CI_Controller {
                 throw new Exception('Missing required fields');
             }
 
-            // Start transaction
             $this->db->trans_start();
 
-            // Update status
             $update_data = [
                 'status' => $status,
                 'pesan' => $pesan,
@@ -173,18 +169,16 @@ class Menu extends CI_Controller {
                 throw new Exception('Failed to update status');
             }
 
-            // Handle file uploads
-            if ($status === 'belum diperbaiki' && isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
-                $upload_path = FCPATH . 'uploads/pesan_files/';
+            // Handle file uploads for both "belum diperbaiki" and "disetujui" status
+            if (($status === 'belum diperbaiki' || $status === 'disetujui') && isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
+                $upload_path = FCPATH . 'uploads/' . ($status === 'disetujui' ? 'disetujui_files/' : 'pesan_files/');
                 
-                // Create directory if it doesn't exist
                 if (!file_exists($upload_path)) {
                     if (!mkdir($upload_path, 0777, true)) {
                         throw new Exception('Failed to create upload directory');
                     }
                 }
 
-                // Check directory permissions
                 if (!is_writable($upload_path)) {
                     throw new Exception('Upload directory is not writable');
                 }
@@ -218,7 +212,6 @@ class Menu extends CI_Controller {
 
                     $upload_data = $this->upload->data();
                     
-                    // Remove created_at from the insert data if the column doesn't exist
                     $file_data = [
                         'id_sop' => $id_sop,
                         'file_name' => $upload_data['file_name'],
@@ -226,13 +219,14 @@ class Menu extends CI_Controller {
                         'file_type' => $upload_data['file_type']
                     ];
 
-                    if (!$this->db->insert('pesan_files', $file_data)) {
+                    // Insert into appropriate table based on status
+                    $table = $status === 'disetujui' ? 'disetujui_files' : 'pesan_files';
+                    if (!$this->db->insert($table, $file_data)) {
                         throw new Exception('Failed to save file information');
                     }
                 }
             }
 
-            // Complete transaction
             $this->db->trans_complete();
 
             if ($this->db->trans_status() === FALSE) {
@@ -246,9 +240,7 @@ class Menu extends CI_Controller {
 
         } catch (Exception $e) {
             $this->db->trans_rollback();
-            
             log_message('error', 'Update status error: ' . $e->getMessage());
-            
             echo json_encode([
                 'success' => false,
                 'message' => $e->getMessage()
@@ -263,4 +255,11 @@ class Menu extends CI_Controller {
 		echo json_encode($files);
 		exit;
 	}
+
+    public function get_disetujui_files($id_sop) {
+        header('Content-Type: application/json');
+        $files = $this->db->get_where('disetujui_files', ['id_sop' => $id_sop])->result();
+        echo json_encode($files);
+        exit;
+    }
 }

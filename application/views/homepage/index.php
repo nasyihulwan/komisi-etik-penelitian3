@@ -95,12 +95,12 @@
                           <h3><a href="">Panduan Pengguna untuk Peneliti</a></h3>
                       </div>
                   </div>
-                  <div class="col-lg-3 col-md-4 mt-4 mt-md-0">
+                  <!-- <div class="col-lg-3 col-md-4 mt-4 mt-md-0">
                       <div class="icon-box" data-aos="zoom-in" data-aos-delay="150">
                           <i class="bi bi-book-half" style="color: #e80368;"></i>
                           <h3><a href="">Panduan Pengguna Invited Reviewer</a></h3>
                       </div>
-                  </div>
+                  </div> -->
                   <div class="col-lg-3 col-md-4 mt-4 mt-lg-0">
                       <div class="icon-box" data-aos="zoom-in" data-aos-delay="200">
                           <i class="bi bi-book-half" style="color: #e361ff;"></i>

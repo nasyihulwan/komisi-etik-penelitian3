@@ -35,11 +35,11 @@
             <div class="col-md-12" data-aos="fade-up">
 
                 <p style="text-align:justify">
-                    Proposal harus di-submit paling lambat tanggal x pada bulan berjalan untuk dapat diproses langsung.
-                    Proposal yang diajukan setelah tanggal x, akan mulai di-review pada bulan berikutnya.
+                    Proposal harus di-submit paling lambat tanggal 10 pada bulan berjalan untuk dapat diproses langsung.
+                    Proposal yang diajukan setelah tanggal 10, akan mulai di-review pada bulan berikutnya.
                     <br>
                     Hasil Review
-                    Maksimal tanggal x bulan berikutnya.
+                    Maksimal tanggal 10 bulan berikutnya.
                 </p>
 
 

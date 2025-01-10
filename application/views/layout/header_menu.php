@@ -87,11 +87,14 @@
                     <li class="dropdown"><a href="#"><span>Panduan</span> <i class="bi bi-chevron-down"></i></a>
                         <ul>
                             <li><a href="<?= base_url('bagan_alir') ?>">Bagan Alir </a></li>
-                            <li><a href="#">Panduan Pengguna untuk Peneliti</a></li>
-                            <li><a href="#">Panduan Pengguna Invited Reviewer</a></li>
+                            <li><a href="<?= base_url() ?>assets/file/PANDUAN PENGGUNA WEB KEP UPI UNTUK PENELITI.pdf"
+                                    download> Panduan Pengguna untuk Peneliti</a>
+                                </a>
+                            </li>
+                            <!-- <li><a href="#">Panduan Pengguna Invited Reviewer</a></li> -->
                             <li><a href="<?= base_url('tarif') ?>">Tarif</a></li>
                             <li><a href="<?= base_url('estimasi_waktu') ?>">Estimasi Waktu</a></li>
-                            <li><a href="#">Reviewer</a></li>
+                            <!-- <li><a href="#">Reviewer</a></li> -->
                             <li><a href="<?= base_url('perpanjangan') ?>">Prosedur Alur Perpanjangan Surat Pernyataan
                                     Etik</a></li>
                             <li><a href="<?= base_url('lupa_password') ?>">Panduan Pengguna Lupa Password</a></li>
@@ -112,9 +115,9 @@
                                     Penelitian</a></li>
                         </ul>
                     </li>
-                    <li class="dropdown"><a href="#"><span>Referensi</span> <i class="bi bi-chevron-down"></i></a>
+                    <!-- <li class="dropdown"><a href="#"><span>Referensi</span> <i class="bi bi-chevron-down"></i></a>
 
-                    </li>
+                    </li> -->
 
                     <li><a class="nav-link scrollto" href="<?= base_url('contact') ?>">Kontak Kami</a></li>
 
