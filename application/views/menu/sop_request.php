@@ -12,13 +12,13 @@
         <div class="row mt-5">
 
             <div class="col-12 col-sm-10 col-md-10 mx-auto">
-                <div class="alert alert-warning text-center" role="alert">
+                <!-- <div class="alert alert-warning text-center" role="alert">
                     <i class="bi bi-exclamation-triangle-fill"></i> Website masih dalam pengembangan, untuk melakukan
                     pengajuan layanan silahkan kunjungi link berikut.
                     <br><a
                         href="https://docs.google.com/forms/d/e/1FAIpQLSfcuYD9WGyGCq4EcAU-qdt79NwKA0VNC3PgFuSYx-8yJo1NVw/viewform"
                         target="_blank" class="btn btn-danger mt-2"><i class="bi bi-pencil-square"></i> Ajukan</a>
-                </div>
+                </div> -->
                 <!-- <div class=" top-50 start-50 translate-middle"> -->
                 <div class="card shadow">
                     <div class="card-body">

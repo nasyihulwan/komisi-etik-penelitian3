@@ -76,7 +76,7 @@ class Auth extends CI_Controller {
 				];
 				// Jika Berhasil, simpan data ke session
 				$this->session->set_userdata($newdata);
-				// $this->session->set_userdata('id_members', $user->id_members);     
+				// $this->session->set_userdata('id_members', $cek_akun['id_members']);     
 				return redirect(base_url());
 			} else {
 				$this->session->set_flashdata('password_invalid', 'Password Salah!');

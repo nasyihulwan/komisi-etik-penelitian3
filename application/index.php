@@ -59,7 +59,7 @@
                       penelitian. [Ketua Komisi Etik UPI Prof Budi Mulyanti, M.Si]</p>
 
                   <div class="alert alert-warning text-center" role="alert">
-                      <i class="bi bi-exclamation-triangle-fill"></i> Alternatif untuk melakukan
+                      <i class="bi bi-exclamation-triangle-fill"></i> Alternatif ntuk melakukan
                       pengajuan layanan silahkan kunjungi link berikut.
                       <br><a
                           href="https://docs.google.com/forms/d/e/1FAIpQLSfcuYD9WGyGCq4EcAU-qdt79NwKA0VNC3PgFuSYx-8yJo1NVw/viewform"

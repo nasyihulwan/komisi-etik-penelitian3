@@ -140,7 +140,7 @@ class Menu extends CI_Controller {
 		$this->load->view('layout/footer_menu');
 	}
 
-    public function update_status() {
+	public function update_status() {
         header('Content-Type: application/json');
         
         try {
@@ -174,7 +174,7 @@ class Menu extends CI_Controller {
             }
 
             // Handle file uploads
-            if ($status === 'belum diperbaiki' && isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
+            if ($status === 'diperbaiki' && isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
                 $upload_path = FCPATH . 'uploads/pesan_files/';
                 
                 // Create directory if it doesn't exist

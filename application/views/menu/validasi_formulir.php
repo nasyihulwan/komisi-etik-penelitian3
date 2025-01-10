@@ -252,7 +252,7 @@ function showUpdatePopup(id_sop) {
                 return false;
             }
 
-            if (status === "belum diperbaiki") {
+            if (status === "diperbaiki") {
                 if (pesan.trim() === "") {
                     Swal.showValidationMessage('Harap isi pesan untuk status diperbaiki!');
                     return false;

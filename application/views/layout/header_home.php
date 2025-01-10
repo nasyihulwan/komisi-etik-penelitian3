@@ -95,10 +95,11 @@
                             <li><a href="#">Panduan Pengguna untuk Peneliti</a></li>
                             <li><a href="#">Panduan Pengguna Invited Reviewer</a></li>
                             <li><a href="<?= base_url('tarif') ?>">Tarif</a></li>
-                            <li><a href="#">Estimasi Waktu</a></li>
+                            <li><a href="<?= base_url('estimasi_waktu') ?>">Estimasi Waktu</a></li>
                             <li><a href="#">Reviewer</a></li>
-                            <li><a href="#">Prosedur Alur Perpanjangan Surat Pernyataan Etik</a></li>
-                            <li><a href="#">Panduan Pengguna Lupa Password</a></li>
+                            <li><a href="<?= base_url('perpanjangan') ?>">Prosedur Alur Perpanjangan Surat Pernyataan
+                                    Etik</a></li>
+                            <li><a href="<?= base_url('lupa_password') ?>">Panduan Pengguna Lupa Password</a></li>
                         </ul>
                     </li>
                     <li class="dropdown"><a href="#"><span>Dokumen Persyaratan</span> <i
