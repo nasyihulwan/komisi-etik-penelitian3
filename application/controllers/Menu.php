@@ -12,6 +12,7 @@ class Menu extends CI_Controller {
 		$this->load->model('validasiformulir_model');
 		$this->load->model('member_model');
 		$this->load->library('upload');
+        $this->load->helper('main');
 
 		if ($this->input->is_ajax_request()) {
             set_error_handler(function($severity, $message, $file, $line) {
@@ -103,29 +104,28 @@ class Menu extends CI_Controller {
 		}
 
 		if (!empty($uploadData)) {
-			$data = array(
-				'judul' => $judul,
-				'kategori' => $kategori,
-				'sumber_dana' => $sumber_dana,
-				'pemberi_hibah' => $pemberi_hibah,
-				'surat_pernyataan_mandiri' => isset($uploadData['surat_pernyataan_mandiri']) ? $uploadData['surat_pernyataan_mandiri'] : null,
-				'formulir_etik' => isset($uploadData['formulir_etik']) ? $uploadData['formulir_etik'] : null,
-				'proposal' => isset($uploadData['proposal']) ? $uploadData['proposal'] : null,
-				'bukti_pembayaran' => isset($uploadData['bukti_pembayaran']) ? $uploadData['bukti_pembayaran'] : null,
-				'id_members' => $this->session->userdata('id_members')
-			);
-
-			$insert = $this->menu_model->insert_penelitian($data);
-			if ($insert) {
-				$this->session->set_flashdata('success', 'Penelitian berhasil disubmit.');
-			} else {
-				$this->session->set_flashdata('error', 'Terjadi kesalahan, silakan coba lagi.');
-			}
-		}
-
-		redirect('menu/sop_request');
-
-	}
+            $data = array(
+                'judul' => $judul,
+                'kategori' => $kategori,
+                'sumber_dana' => $sumber_dana,
+                'pemberi_hibah' => $pemberi_hibah,
+                'surat_pernyataan_mandiri' => isset($uploadData['surat_pernyataan_mandiri']) ? $uploadData['surat_pernyataan_mandiri'] : null,
+                'formulir_etik' => isset($uploadData['formulir_etik']) ? $uploadData['formulir_etik'] : null,
+                'proposal' => isset($uploadData['proposal']) ? $uploadData['proposal'] : null,
+                'bukti_pembayaran' => isset($uploadData['bukti_pembayaran']) ? $uploadData['bukti_pembayaran'] : null,
+                'id_members' => $this->session->userdata('id_members')
+            );
+    
+            $insert = $this->menu_model->insert_penelitian($data);
+            if ($insert) {
+                $this->session->set_flashdata('success', 'Penelitian berhasil disubmit.');
+            } else {
+                $this->session->set_flashdata('error', 'Terjadi kesalahan saat menyimpan data, silakan coba lagi.');
+            }
+        }
+    
+        redirect('menu/sop_request');
+    }
 
 	public function validasi_formulir()
 	{
@@ -148,28 +148,44 @@ class Menu extends CI_Controller {
             if (!$this->input->is_ajax_request()) {
                 throw new Exception('Invalid request method');
             }
-
+    
             $id_sop = $this->input->post('id_sop');
             $status = $this->input->post('status');
             $pesan = $this->input->post('pesan');
-
+    
             if (empty($id_sop) || empty($status)) {
                 throw new Exception('Missing required fields');
             }
-
+    
             $this->db->trans_start();
-
+    
+            // Update the main sop_request table
             $update_data = [
                 'status' => $status,
                 'pesan' => $pesan,
                 'updated_at' => date('Y-m-d H:i:s')
             ];
-
+    
             $update_success = $this->menu_model->update_status($id_sop, $update_data);
             if (!$update_success) {
                 throw new Exception('Failed to update status');
             }
-
+    
+            // Generate unique ID and insert into history
+            $unique_id = $this->menu_model->generate_unique_history_id($id_sop);
+            
+            $history_data = [
+                'id' => $unique_id,
+                'id_sop' => $id_sop,
+                'status' => $status,
+                'pesan' => $pesan,
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+    
+            if (!$this->db->insert('sop_request_histori', $history_data)) {
+                throw new Exception('Failed to insert history record');
+            }
+    
             // Handle file uploads for both "belum diperbaiki" and "disetujui" status
             if (($status === 'belum diperbaiki' || $status === 'disetujui') && isset($_FILES['files']) && !empty($_FILES['files']['name'][0])) {
                 $upload_path = FCPATH . 'uploads/' . ($status === 'disetujui' ? 'disetujui_files/' : 'pesan_files/');
@@ -179,47 +195,48 @@ class Menu extends CI_Controller {
                         throw new Exception('Failed to create upload directory');
                     }
                 }
-
+    
                 if (!is_writable($upload_path)) {
                     throw new Exception('Upload directory is not writable');
                 }
-
+    
                 $config = [
                     'upload_path' => $upload_path,
                     'allowed_types' => 'pdf|doc|docx|xls|xlsx|jpg|jpeg|png',
                     'max_size' => 2048,
                     'overwrite' => TRUE
                 ];
-
+    
                 $this->upload->initialize($config);
-
+    
                 foreach ($_FILES['files']['name'] as $i => $filename) {
                     if (empty($filename)) continue;
-
+    
                     $_FILES['file']['name'] = $_FILES['files']['name'][$i];
                     $_FILES['file']['type'] = $_FILES['files']['type'][$i];
                     $_FILES['file']['tmp_name'] = $_FILES['files']['tmp_name'][$i];
                     $_FILES['file']['error'] = $_FILES['files']['error'][$i];
                     $_FILES['file']['size'] = $_FILES['files']['size'][$i];
-
+    
                     $new_filename = uniqid() . '_' . time() . '_' . preg_replace('/\s+/', '_', $filename);
                     $config['file_name'] = $new_filename;
                     
                     $this->upload->initialize($config);
-
+    
                     if (!$this->upload->do_upload('file')) {
                         throw new Exception('Upload error: ' . $this->upload->display_errors('', ''));
                     }
-
+    
                     $upload_data = $this->upload->data();
                     
                     $file_data = [
+                        'id_histori' => $unique_id,
                         'id_sop' => $id_sop,
                         'file_name' => $upload_data['file_name'],
                         'original_name' => $filename,
                         'file_type' => $upload_data['file_type']
                     ];
-
+    
                     // Insert into appropriate table based on status
                     $table = $status === 'disetujui' ? 'disetujui_files' : 'pesan_files';
                     if (!$this->db->insert($table, $file_data)) {
@@ -227,18 +244,18 @@ class Menu extends CI_Controller {
                     }
                 }
             }
-
+    
             $this->db->trans_complete();
-
+    
             if ($this->db->trans_status() === FALSE) {
                 throw new Exception('Database transaction failed');
             }
-
+    
             echo json_encode([
                 'success' => true,
                 'message' => 'Status berhasil diperbarui'
             ]);
-
+    
         } catch (Exception $e) {
             $this->db->trans_rollback();
             log_message('error', 'Update status error: ' . $e->getMessage());
@@ -249,10 +266,13 @@ class Menu extends CI_Controller {
         }
     }
 	
-
 	public function get_pesan_files($id_sop) {
 		header('Content-Type: application/json');
-		$files = $this->db->get_where('pesan_files', ['id_sop' => $id_sop])->result();
+        $files = $this->db->order_by('id_pesan_file', 'DESC') 
+        ->limit(1)
+        ->get_where('pesan_files', ['id_sop' => $id_sop])
+        ->result();
+
 		echo json_encode($files);
 		exit;
 	}
@@ -267,8 +287,11 @@ class Menu extends CI_Controller {
     public function get_revision_files($id_sop) {
         header('Content-Type: application/json');
         
-        $revision = $this->db->get_where('revisi_files', ['id_sop' => $id_sop])->row_array();
-        
+        $revision = $this->db->order_by('id', 'DESC') 
+        ->limit(1)
+        ->get_where('revisi_files', ['id_sop' => $id_sop])
+        ->row_array();
+
         if ($revision) {
             // Format the response to include both system and original filenames
             $files = [];
@@ -283,7 +306,7 @@ class Menu extends CI_Controller {
                         'type' => $type,
                         'file_name' => $revision[$revisi_key],
                         'original_name' => $revision[$original_key],
-                        'download_url' => base_url('uploads/revisions/' . $revision[$revisi_key])
+                        'download_url' => base_url('uploads/revisi_files/' . $revision[$revisi_key])
                     ];
                 }
             }
@@ -338,8 +361,13 @@ class Menu extends CI_Controller {
                 'proposal' => 'revisi_proposal',
                 'bukti_pembayaran' => 'revisi_bukti_pembayaran'
             ];
+
+            $unique_id = $this->menu_model->generate_unique_history_id($id_sop);
     
-            $update_data = ['uploaded_at' => date('Y-m-d H:i:s')];
+            $update_data = [
+                'id_histori' => $unique_id,
+                'uploaded_at' => date('Y-m-d H:i:s')
+            ];
     
             foreach ($file_fields as $field => $db_column) {
                 if (isset($_FILES[$field]) && !empty($_FILES[$field]['name'])) {
@@ -360,14 +388,22 @@ class Menu extends CI_Controller {
             $this->db->where('id_sop', $id_sop);
             $exists = $this->db->get('revisi_files')->row_array();
     
-            if ($exists != null) {
-                $this->db->where('id_sop', $id_sop);
-                $this->db->update('revisi_files', $update_data);
-                $this->db->where('id_sop', $id_sop);
-                $this->db->update('sop_request', ['status' => 'sudah diperbaiki']);
-            } else {
-                $update_data['id_sop'] = $id_sop;
-                $this->db->insert('revisi_files', $update_data);
+            
+            $update_data['id_sop'] = $id_sop;
+            $this->db->insert('revisi_files', $update_data);
+
+            $this->db->where('id_sop', $id_sop);
+            $this->db->update('sop_request', ['status' => 'sudah diperbaiki']);
+
+            $history_data = [
+                'id' => $unique_id,
+                'id_sop' => $id_sop,
+                'status' => 'sudah diperbaiki',
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+        
+            if (!$this->db->insert('sop_request_histori', $history_data)) {
+                throw new Exception('Failed to insert history record');
             }
     
             $this->db->trans_complete();
@@ -396,6 +432,7 @@ class Menu extends CI_Controller {
         $sop_details = $this->validasiformulir_model->getSopById($id_sop);
         $member_details = $this->member_model->getMemberById($sop_details['id_members']);
         $history = $this->validasiformulir_model->getHistoriById($id_sop);
+        $latest_message = $this->menu_model->get_latest_message($id_sop);
     
         $formatted_history = [];
         foreach ($history as $record) {
@@ -410,8 +447,8 @@ class Menu extends CI_Controller {
                     'review_files' => [], 
                     'revision_files' => [], 
                     'approval_files' => [], 
-                    'has_review' => !empty($record['pesan']),
-                    'has_revision' => $record['id_revisi_files'], 
+                    'has_revision' => !empty($record['pesan']),
+                    'has_submitted_revision' => $record['id_revisi_files'], 
                     'has_approved' => $record['id_persetujuan_files'], 
                 ];
             }
@@ -493,21 +530,6 @@ class Menu extends CI_Controller {
         return []; // Kembalikan array kosong jika tidak ada data
     }
     
-    // private function getStatusFromFiles($record) {
-    //     if (!empty($record['file_name_persetujuan'])) {
-    //         return 'disetujui'; // Permohonan Disetujui
-    //     } elseif (!empty($record['revisi_surat_mandiri']) || 
-    //               !empty($record['revisi_formulir_etik']) || 
-    //               !empty($record['revisi_proposal']) || 
-    //               !empty($record['revisi_bukti_pembayaran'])) {
-    //         return 'belum diperbaiki'; // Revisi Diperlukan
-    //     } elseif (!empty($record['file_name_pesan'])) {
-    //         return 'sedang diperiksa'; // Permohonan Direview
-    //     }
-    //     return 'belum diperiksa'; // Permohonan Diajukan
-    // }
-    
-    
     private function _getBadgeClass($status) {
         $classes = [
             'belum diperiksa' => 'bg-secondary',
@@ -530,7 +552,6 @@ class Menu extends CI_Controller {
         ];
         return $icons[$status] ?? 'circle'; // Default icon
     }
-    
     
     private function _getStatusTitle($status) {
         $titles = [

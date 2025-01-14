@@ -192,6 +192,18 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title"><b>Status Terakhir</b></h5>
+                        <?php
+                        // Ambil elemen pertama dari $history (jika ada)
+                        $item = isset($history[0]) ? $history[0] : null;
+
+                        // Periksa apakah elemen pertama memenuhi kondisi
+                        if ($item && $item['has_submitted_revision']): ?>
+                        <span class="badge bg-info text-white" style="cursor: pointer;"
+                            onclick="showMessage('<?= htmlspecialchars($sop['pesan'], ENT_QUOTES) ?>', <?= $sop['id_sop'] ?>)">
+                            Upload Revisi
+                        </span>
+                        <?php endif; ?>
+
                     </div>
                     <div class="card-body">
                         <div class="timeline">
@@ -205,7 +217,8 @@
                                         <?= $item['title'] ?>
                                         <span class="timeline-date"><?= $item['date'] ?></span>
                                     </div>
-                                    <?php if ($item['has_review']): ?>
+                                    <?php if ($item['has_revision'] && empty($item['has_submitted_revision'])): ?>
+
                                     <div class="review-card">
                                         <div class="review-header">
                                             Hasil Review
@@ -222,7 +235,8 @@
                                     </div>
                                     <?php endif; ?>
 
-                                    <?php if ($item['has_revision']): ?>
+                                    <?php if ($item['has_submitted_revision']): ?>
+
                                     <div class="review-card">
                                         <div class="review-header">
                                             File Revisi
@@ -256,7 +270,6 @@
                                 </div>
                             </div>
                             <?php endforeach; ?>
-
                         </div>
                     </div>
                 </div>
@@ -264,3 +277,257 @@
         </div>
     </div>
 </section>
+
+<script>
+function showMessage(message, id_sop) {
+    fetch('<?= base_url('menu/get_pesan_files/') ?>' + id_sop)
+        .then(response => response.json())
+        .then(files => {
+            console.log('Fetched files:', files);
+
+            let filesHtml = '';
+
+            // Only show upload form for non-admin users
+            const userLevel = '<?= $this->session->userdata('level') ?>';
+            const uploadFormHtml = (userLevel !== 'superadmin' && userLevel !== 'petugas') ? `
+                <div class="mt-4">
+                    <h6 class="mb-3">Upload File Perbaikan:</h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Surat Pernyataan Mandiri</label>
+                        <input type="file" class="form-control mb-2" id="surat_mandiri" accept=".pdf,.doc,.docx">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Formulir Etik</label>
+                        <input type="file" class="form-control mb-2" id="formulir_etik" accept=".pdf,.doc,.docx">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Proposal</label>
+                        <input type="file" class="form-control mb-2" id="proposal" accept=".pdf,.doc,.docx">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Bukti Pembayaran</label>
+                        <input type="file" class="form-control mb-2" id="bukti_pembayaran" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                    </div>
+
+                    <div class="form-text mb-3">
+                        Format yang diizinkan: PDF, DOC, DOCX (Maks. 2MB per file)<br>
+                        Format Bukti Pembayaran: PDF, DOC, DOCX, JPG, JPEG, PNG
+                    </div>
+
+                    <button type="button" class="btn btn-primary" onclick="submitRevision(${id_sop})">
+                        Submit Perbaikan
+                    </button>
+                </div>
+            ` : '';
+
+            Swal.fire({
+                title: 'Pesan Perbaikan',
+                html: `
+                    <div class="text-start">
+                        <p>${message}</p>
+                        ${filesHtml}
+                        ${uploadFormHtml}
+                    </div>
+                `,
+                icon: 'info',
+                customClass: {
+                    popup: 'swal2-popup-wide',
+                    confirmButton: 'btn btn-secondary'
+                },
+                width: '40rem',
+                buttonsStyling: false,
+                confirmButtonText: 'Tutup',
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching files:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Gagal mengambil data file pendukung',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+            });
+        });
+}
+</script>
+
+<script>
+function submitRevision(id_sop) {
+    const formData = new FormData();
+    formData.append('id_sop', id_sop);
+    formData.append('status', 'sudah diperbaiki');
+
+    // Get all revision files
+    const fileFields = [
+        'surat_mandiri',
+        'formulir_etik',
+        'proposal',
+        'bukti_pembayaran'
+    ];
+
+    let hasFiles = false;
+    fileFields.forEach(field => {
+        const fileInput = document.getElementById(field);
+        if (fileInput && fileInput.files[0]) {
+            formData.append(field, fileInput.files[0]);
+            hasFiles = true;
+        }
+    });
+
+    if (!hasFiles) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Harap upload minimal satu file perbaikan!',
+            customClass: {
+                confirmButton: 'btn btn-danger'
+            },
+            buttonsStyling: false
+        });
+        return;
+    }
+
+    // Debug: Log FormData contents
+    for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+    }
+
+    Swal.fire({
+        title: 'Konfirmasi',
+        text: 'Apakah Anda yakin ingin mengirim file perbaikan ini?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Kirim',
+        cancelButtonText: 'Batal',
+        customClass: {
+            confirmButton: 'btn btn-success',
+            cancelButton: 'btn btn-danger'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.showLoading();
+
+            fetch('<?= base_url('menu/update_revisi') ?>', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(async response => {
+                    const responseText = await response.text();
+                    if (!response.ok) {
+                        throw new Error(
+                            `HTTP error! status: ${response.status}, body: ${responseText}`);
+                    }
+                    try {
+                        return JSON.parse(responseText);
+                    } catch (e) {
+                        throw new Error('Server response was not in JSON format');
+                    }
+                })
+                .then(data => {
+                    Swal.hideLoading();
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: data.message || 'File perbaikan berhasil dikirim',
+                            customClass: {
+                                confirmButton: 'btn btn-success'
+                            },
+                            buttonsStyling: false
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        throw new Error(data.message || 'Terjadi kesalahan pada server!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.hideLoading();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: error.message || 'Terjadi kesalahan saat mengirim file',
+                        customClass: {
+                            confirmButton: 'btn btn-danger'
+                        },
+                        buttonsStyling: false
+                    });
+                });
+        }
+    });
+}
+</script>
+
+<script>
+function showRevisionFiles(id_sop) {
+    fetch('<?= base_url('menu/get_revision_files/') ?>' + id_sop)
+        .then(response => response.json())
+        .then(files => {
+            let filesHtml = '';
+            if (files && files.length > 0) {
+                filesHtml = `
+                    <div class="mt-4">
+                        <h6>File Revisi:</h6>
+                        <ul class="list-unstyled">
+                `;
+                files.forEach(file => {
+                    const fileName = file.file_name || '';
+                    const originalName = file.original_name || fileName;
+                    const fileUrl = '<?= base_url('uploads/revisi_files/') ?>' + fileName;
+
+                    filesHtml += `
+                        <li class="mb-2">
+                            <a href="${fileUrl}" 
+                               target="_blank"
+                               class="btn btn-sm btn-outline-primary"
+                               title="${originalName}">
+                                ${originalName}
+                            </a>
+                        </li>`;
+                });
+                filesHtml += `
+                        </ul>
+                    </div>`;
+            } else {
+                filesHtml = '<div class="text-center">Tidak ada file yang tersedia</div>';
+            }
+
+            Swal.fire({
+                title: 'File Revisi',
+                html: filesHtml,
+                icon: 'info',
+                customClass: {
+                    popup: 'swal2-popup-wide',
+                    confirmButton: 'btn btn-primary'
+                },
+                width: '40rem',
+                buttonsStyling: false,
+                confirmButtonText: 'Tutup'
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching files:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Gagal memuat file revisi',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+            });
+        });
+}
+</script>
