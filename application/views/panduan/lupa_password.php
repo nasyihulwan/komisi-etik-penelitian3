@@ -40,14 +40,19 @@
                     dapat dijelaskan sebagai berikut:
                     <br>
                     <br>
-                    1. Buka halaman <a href="https://etikpenelitian.upi.edu/">http://etikpenelitian.upi.edu/</a> :
-                    kemudian pilih halaman login
+
+                    1. Buka halaman <a
+                        href="https://etikpenelitian.upi.edu/auth/lupa_password">http://etikpenelitian.upi.edu/auth/lupa_password</a>
+
                     <br>
-                    2. Pilih tombol lupa password
+                    2. Masukkan alamat email Anda yang terdaftar.
                     <br>
-                    3. User diminta memasukan alamat email
+                    3. Periksa email Anda untuk link reset password.
                     <br>
-                    4. Sistem akan mengirim ulang password ke email
+                    4. Klik link tersebut dan buat password baru.
+                    <br>
+                    5. Login kembali dengan password baru Anda.
+                    <br>
                 </p>
 
 

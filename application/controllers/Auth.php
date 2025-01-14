@@ -33,17 +33,6 @@ class Auth extends CI_Controller {
 		$this->form_validation->set_rules($rules);
 		if ($this->form_validation->run() == FALSE)
 		{
-			// if (validation_errors() != null) {
-			// 	# code...
-			// 	// var_dump(validation_errors());
-			// 	$this->session->set_flashdata('email_invalid', form_error('email'));
-			// 	$this->session->set_flashdata('password_invalid', form_error('password'));
-			// 	return redirect(base_url('auth'))->withInput();
-			// 	// echo form_error('email');
-			// 	// die;
-			// } else {
-			// 	# code...
-			// }
 			$data['page'] = 'home';
 			$this->load->view('layout/header_auth', $data);
 			$this->load->view('auth/login_user');
@@ -247,6 +236,86 @@ class Auth extends CI_Controller {
         return implode($pass); //turn the array into a string
     }
 
+	public function lupa_password() {
+		$rules = [
+			[
+				'field' => 'email',
+				'label' => 'email',
+				'rules' => 'required|valid_email',
+				'errors' => [
+					'required' => 'Email tidak boleh kosong!',
+					'valid_email' => 'Email tidak valid!'
+				]
+			]           
+		];
+		$this->form_validation->set_rules($rules);
+		if ($this->form_validation->run() == FALSE) {
+			$data['page'] = 'home';
+			$this->load->view('layout/header_auth', $data);
+			$this->load->view('auth/lupa_password');
+			$this->load->view('layout/footer_auth');
+		} else {
+			$this->_handle_lupa_password();
+		}
+	}
+	
+	private function _handle_lupa_password() {
+		$email = $this->input->post('email', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+		
+		// Check if email exists in database
+		$user = $this->db->get_where('members', ['email' => $email])->row_array();
+		
+		if ($user == NULL) {
+			$this->session->set_flashdata('email_invalid', 'Email tidak terdaftar dalam sistem!');
+			return redirect(base_url('auth/lupa_password'))->withInput();
+		}
+		
+		// Generate reset token
+		$token = bin2hex(random_bytes(32)); // Generate secure random token
+		$expired_at = date('Y-m-d H:i:s', strtotime('+1 hour')); // Token berlaku 1 jam
+		
+		// Save token to database
+		$data = [
+			'email' => $email,
+			'token' => $token,
+			'expired_at' => $expired_at,
+			'is_used' => 0
+		];
+		
+		$this->db->insert('password_resets', $data);
+		
+		// Prepare email content with reset link
+		$reset_link = base_url('auth/reset_password/' . $token);
+		$subject = "Reset Password - Komisi Etik Penelitian UPI";
+		$pesan = '<html> 
+		<head> 
+			<title>Reset Password - Komisi Etik Penelitian UPI</title> 
+		</head> 
+		<body> 
+			<h3>Reset Password Akun Komisi Etik Penelitian UPI</h3> 
+			<p>Anda telah meminta untuk mereset password akun Anda.</p>
+			<p>Silakan klik link di bawah ini untuk mereset password Anda:</p>
+			<p><a href="'.$reset_link.'">'.$reset_link.'</a></p>
+			<p>Link ini akan kadaluarsa dalam 1 jam.</p>
+			<p>Jika Anda tidak meminta reset password, abaikan email ini.</p>
+			<br>
+			<p>Terima kasih,</p>
+			<p>Tim Komisi Etik Penelitian UPI</p>
+		</body> 
+		</html>';
+		
+		// Send email
+		$kirimEmail = $this->sendEmail($email, $subject, $pesan);
+		
+		if ($kirimEmail) {
+			$this->session->set_flashdata('success', '<i class="bi bi-check-circle-fill"></i> Link reset password telah dikirim ke email Anda!');
+			return redirect(base_url('auth'));
+		} else {
+			$this->session->set_flashdata('danger', '<i class="bi bi-x-circle-fill"></i> Gagal mengirim email reset password. Silahkan coba lagi!');
+			return redirect(base_url('auth/lupa_password'))->withInput();
+		}
+	}
+
 	public function sendEmail($email_tujuan, $subject, $pesan) {
 		date_default_timezone_set('Asia/Jakarta');
 		$config = [
@@ -274,5 +343,76 @@ class Auth extends CI_Controller {
         } else {
             return false;
         }
+	}
+	
+	public function reset_password($token) {
+		// Check if token exists and still valid
+		$reset_data = $this->db->get_where('password_resets', [
+			'token' => $token,
+			'is_used' => 0
+		])->row_array();
+		
+		if (!$reset_data) {
+			$this->session->set_flashdata('danger', '<i class="bi bi-x-circle-fill"></i> Link reset password tidak valid!');
+			return redirect(base_url('auth'));
+		}
+		
+		// Check if token is expired
+		if (strtotime($reset_data['expired_at']) < time()) {
+			$this->session->set_flashdata('danger', '<i class="bi bi-x-circle-fill"></i> Link reset password sudah kadaluarsa!');
+			return redirect(base_url('auth'));
+		}
+		
+		$data['token'] = $token;
+		$data['page'] = 'Reset Password';
+		
+		$this->load->view('layout/header_auth', $data);
+		$this->load->view('auth/reset_password', $data);
+		$this->load->view('layout/footer_auth');
+	}
+	
+	public function do_reset_password() {
+		$token = $this->input->post('token');
+		$password = $this->input->post('password');
+		$confirm_password = $this->input->post('confirm_password');
+		
+		// Validate password
+		if (strlen($password) < 6) {
+			$this->session->set_flashdata('danger', '<i class="bi bi-x-circle-fill"></i> Password minimal 6 karakter!');
+			return redirect(base_url('auth/reset_password/' . $token));
+		}
+		
+		if ($password !== $confirm_password) {
+			$this->session->set_flashdata('danger', '<i class="bi bi-x-circle-fill"></i> Konfirmasi password tidak sesuai!');
+			return redirect(base_url('auth/reset_password/' . $token));
+		}
+		
+		// Get reset data
+		$reset_data = $this->db->get_where('password_resets', [
+			'token' => $token,
+			'is_used' => 0
+		])->row_array();
+		
+		if (!$reset_data || strtotime($reset_data['expired_at']) < time()) {
+			$this->session->set_flashdata('danger', '<i class="bi bi-x-circle-fill"></i> Link reset password tidak valid atau sudah kadaluarsa!');
+			return redirect(base_url('auth'));
+		}
+		
+		// Update password
+		$password_hash = password_hash($password, PASSWORD_DEFAULT);
+		$this->db->where('email', $reset_data['email']);
+		$update = $this->db->update('members', ['password' => $password_hash]);
+		
+		if ($update) {
+			// Mark token as used
+			$this->db->where('token', $token);
+			$this->db->update('password_resets', ['is_used' => 1]);
+			
+			$this->session->set_flashdata('success', '<i class="bi bi-check-circle-fill"></i> Password berhasil direset. Silakan login dengan password baru Anda!');
+			return redirect(base_url('auth'));
+		} else {
+			$this->session->set_flashdata('danger', '<i class="bi bi-x-circle-fill"></i> Gagal mereset password. Silakan coba lagi!');
+			return redirect(base_url('auth/reset_password/' . $token));
+		}
 	}
 }

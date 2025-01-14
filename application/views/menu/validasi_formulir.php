@@ -28,11 +28,24 @@
 }
 </style>
 
+<!-- Sweetalert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
 <section>
     <div class="container">
         <div class="row mt-5">
+            <div class="mb-3">
+                <h2><b>Uji Etik Penelitian</b></h2>
+                <h6>List semua permohonan</h6>
+            </div>
+
+            <?php if ($this->session->userdata('level') != 'member') { ?>
+
+
+
+
+
             <div class="table-responsive">
                 <table id="dataTable" class="table table-striped text-center">
                     <thead>
@@ -115,6 +128,12 @@
                                     onclick="showApprovedFiles(<?= $r->id_sop ?>)">
                                     Lihat File Persetujuan
                                 </span>
+                                <?php } else if($r->status == "sudah diperbaiki") { ?>
+                                <br><br>
+                                <span class="badge bg-info text-white" style="cursor: pointer;"
+                                    onclick="showRevisionFiles(<?= $r->id_sop ?>)">
+                                    Lihat File Revisi
+                                </span>
                                 <?php } ?>
                             </td>
                             <td class="text-center">
@@ -130,9 +149,6 @@
                                 <span class="badge bg-secondary">-</span>
                                 <?php } ?>
                             </td>
-
-
-
                             <td><?= $r->created_at ?></td>
                             <td><?= $r->updated_at ?></td>
 
@@ -147,9 +163,33 @@
                     </tbody>
                 </table>
             </div>
+
+
         </div>
+        <?php } else if ($this->session->userdata('level') == 'member') { ?>
+        <?php $no = 1; foreach($query as $r) { ?>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <small><?= $r->kategori ?></small>
+                <h5 class="card-title"><b>
+                        <?= $r->judul ?>
+                    </b><br></h5>
+                <div class="card-text mt-3">
+                    <h6><b>Nama Pengaju: </b> <br> <small><?= $r->nama ?></small></h6>
+                    <a href="<?= base_url('menu/formulir_detail/') ?><?= $r->id_sop ?>" class="btn btn-primary">Detail
+                        <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+        <?php } ?>
+        <?php } ?>
     </div>
 </section>
+
+
+<!-- jQuery (required for DataTables) -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 
 <!-- Bootstrap Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -158,8 +198,8 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-<!-- jQuery (required for DataTables) -->
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+
 
 <script>
 $(document).ready(function() {
@@ -180,10 +220,7 @@ $(document).ready(function() {
         }
     });
 });
-</script>
 
-
-<script>
 function showUpdatePopup(id_sop) {
     Swal.fire({
         title: 'Update Status',
@@ -368,63 +405,252 @@ function validateFiles(input) {
         }
     }
 }
+</script>
 
+<script>
 function showMessage(message, id_sop) {
-    fetch(`<?= base_url('menu/get_pesan_files/') ?>${id_sop}`)
+    fetch('<?= base_url('menu/get_pesan_files/') ?>' + id_sop)
         .then(response => response.json())
         .then(files => {
+            console.log('Fetched files:', files);
+
             let filesHtml = '';
-            if (files.length > 0) {
-                filesHtml = '<div class="mt-4"><h6>File Pendukung:</h6><ul class="list-unstyled">';
+            if (files && files.length > 0) {
+                filesHtml = `
+                    <div class="mt-4">
+                        <h6>File Pendukung:</h6>
+                        <ul class="list-unstyled">
+                `;
                 files.forEach(file => {
+                    const fileName = file.file_name || '';
+                    const originalName = file.original_name || fileName;
+                    const fileUrl = '<?= base_url('uploads/pesan_files/') ?>' + fileName;
+
                     filesHtml += `
-                    <li class="mb-2">
-                        <a href="<?= base_url('uploads/pesan_files/') ?>${file.file_name}" 
-                           target="_blank" class="btn btn-sm btn-outline-primary">
-                            ${file.original_name}
-                        </a>
-                    </li>`;
+                        <li class="mb-2">
+                            <a href="${fileUrl}" 
+                               target="_blank"
+                               class="btn btn-sm btn-outline-primary"
+                               title="${originalName}">
+                                ${originalName}
+                            </a>
+                        </li>`;
                 });
-                filesHtml += '</ul></div>';
+                filesHtml += `
+                        </ul>
+                    </div>`;
             }
+
+            // Only show upload form for non-admin users
+            const userLevel = '<?= $this->session->userdata('level') ?>';
+            const uploadFormHtml = (userLevel !== 'superadmin' && userLevel !== 'petugas') ? `
+                <div class="mt-4">
+                    <h6 class="mb-3">Upload File Perbaikan:</h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Surat Pernyataan Mandiri</label>
+                        <input type="file" class="form-control mb-2" id="surat_mandiri" accept=".pdf,.doc,.docx">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Formulir Etik</label>
+                        <input type="file" class="form-control mb-2" id="formulir_etik" accept=".pdf,.doc,.docx">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Proposal</label>
+                        <input type="file" class="form-control mb-2" id="proposal" accept=".pdf,.doc,.docx">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Bukti Pembayaran</label>
+                        <input type="file" class="form-control mb-2" id="bukti_pembayaran" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                    </div>
+
+                    <div class="form-text mb-3">
+                        Format yang diizinkan: PDF, DOC, DOCX (Maks. 2MB per file)<br>
+                        Format Bukti Pembayaran: PDF, DOC, DOCX, JPG, JPEG, PNG
+                    </div>
+
+                    <button type="button" class="btn btn-primary" onclick="submitRevision(${id_sop})">
+                        Submit Perbaikan
+                    </button>
+                </div>
+            ` : '';
 
             Swal.fire({
                 title: 'Pesan Perbaikan',
                 html: `
-                <div class="text-start">
-                    <p>${message}</p>
-                    ${filesHtml}
-                </div>
-            `,
+                    <div class="text-start">
+                        <p>${message}</p>
+                        ${filesHtml}
+                        ${uploadFormHtml}
+                    </div>
+                `,
                 icon: 'info',
                 customClass: {
                     popup: 'swal2-popup-wide',
-                    confirmButton: 'btn btn-primary'
+                    confirmButton: 'btn btn-secondary'
                 },
+                width: '40rem',
                 buttonsStyling: false,
                 confirmButtonText: 'Tutup',
             });
+        })
+        .catch(error => {
+            console.error('Error fetching files:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Gagal mengambil data file pendukung',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+            });
         });
 }
+</script>
 
+<script>
+function submitRevision(id_sop) {
+    const formData = new FormData();
+    formData.append('id_sop', id_sop);
+    formData.append('status', 'sudah diperbaiki');
 
+    // Get all revision files
+    const fileFields = [
+        'surat_mandiri',
+        'formulir_etik',
+        'proposal',
+        'bukti_pembayaran'
+    ];
+
+    let hasFiles = false;
+    fileFields.forEach(field => {
+        const fileInput = document.getElementById(field);
+        if (fileInput && fileInput.files[0]) {
+            formData.append(field, fileInput.files[0]);
+            hasFiles = true;
+        }
+    });
+
+    if (!hasFiles) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Harap upload minimal satu file perbaikan!',
+            customClass: {
+                confirmButton: 'btn btn-danger'
+            },
+            buttonsStyling: false
+        });
+        return;
+    }
+
+    // Debug: Log FormData contents
+    for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+    }
+
+    Swal.fire({
+        title: 'Konfirmasi',
+        text: 'Apakah Anda yakin ingin mengirim file perbaikan ini?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Kirim',
+        cancelButtonText: 'Batal',
+        customClass: {
+            confirmButton: 'btn btn-success',
+            cancelButton: 'btn btn-danger'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.showLoading();
+
+            fetch('<?= base_url('menu/update_revisi') ?>', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(async response => {
+                    const responseText = await response.text();
+                    if (!response.ok) {
+                        throw new Error(
+                            `HTTP error! status: ${response.status}, body: ${responseText}`);
+                    }
+                    try {
+                        return JSON.parse(responseText);
+                    } catch (e) {
+                        throw new Error('Server response was not in JSON format');
+                    }
+                })
+                .then(data => {
+                    Swal.hideLoading();
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: data.message || 'File perbaikan berhasil dikirim',
+                            customClass: {
+                                confirmButton: 'btn btn-success'
+                            },
+                            buttonsStyling: false
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        throw new Error(data.message || 'Terjadi kesalahan pada server!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.hideLoading();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: error.message || 'Terjadi kesalahan saat mengirim file',
+                        customClass: {
+                            confirmButton: 'btn btn-danger'
+                        },
+                        buttonsStyling: false
+                    });
+                });
+        }
+    });
+}
+</script>
+
+<script>
 function showApprovedFiles(id_sop) {
-    fetch(`<?= base_url('menu/get_disetujui_files/') ?>${id_sop}`)
+    // Gunakan URL lengkap dari PHP
+    fetch('<?= base_url('menu/get_disetujui_files/') ?>' + id_sop)
         .then(response => response.json())
         .then(files => {
             let filesHtml = '';
             if (files.length > 0) {
-                filesHtml = '<div class="mt-4"><h6>File Disetujui:</h6><ul class="list-unstyled">';
+                filesHtml = `
+                    <div class="mt-4">
+                        <h6>File Disetujui:</h6>
+                        <ul class="list-unstyled">`;
+
                 files.forEach(file => {
                     filesHtml += `
-                    <li class="mb-2">
-                        <a href="<?= base_url('uploads/disetujui_files/') ?>${file.file_name}" 
-                           target="_blank" class="btn btn-sm btn-outline-primary">
-                            ${file.original_name}
-                        </a>
-                    </li>`;
+                        <li class="mb-2">
+                            <a href="<?= base_url('uploads/disetujui_files/') ?>${file.file_name}" 
+                               target="_blank"
+                               class="btn btn-sm btn-outline-primary">
+                                ${file.original_name}
+                            </a>
+                        </li>`;
                 });
-                filesHtml += '</ul></div>';
+
+                filesHtml += `
+                        </ul>
+                    </div>`;
             } else {
                 filesHtml = '<div class="text-center">Tidak ada file yang tersedia</div>';
             }
@@ -446,6 +672,68 @@ function showApprovedFiles(id_sop) {
             Swal.fire({
                 title: 'Error',
                 text: 'Gagal memuat file yang disetujui',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+            });
+        });
+}
+</script>
+
+<script>
+function showRevisionFiles(id_sop) {
+    fetch('<?= base_url('menu/get_revision_files/') ?>' + id_sop)
+        .then(response => response.json())
+        .then(files => {
+            let filesHtml = '';
+            if (files && files.length > 0) {
+                filesHtml = `
+                    <div class="mt-4">
+                        <h6>File Revisi:</h6>
+                        <ul class="list-unstyled">
+                `;
+                files.forEach(file => {
+                    const fileName = file.file_name || '';
+                    const originalName = file.original_name || fileName;
+                    const fileUrl = '<?= base_url('uploads/revisi_files/') ?>' + fileName;
+
+                    filesHtml += `
+                        <li class="mb-2">
+                            <a href="${fileUrl}" 
+                               target="_blank"
+                               class="btn btn-sm btn-outline-primary"
+                               title="${originalName}">
+                                ${originalName}
+                            </a>
+                        </li>`;
+                });
+                filesHtml += `
+                        </ul>
+                    </div>`;
+            } else {
+                filesHtml = '<div class="text-center">Tidak ada file yang tersedia</div>';
+            }
+
+            Swal.fire({
+                title: 'File Revisi',
+                html: filesHtml,
+                icon: 'info',
+                customClass: {
+                    popup: 'swal2-popup-wide',
+                    confirmButton: 'btn btn-primary'
+                },
+                width: '40rem',
+                buttonsStyling: false,
+                confirmButtonText: 'Tutup'
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching files:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Gagal memuat file revisi',
                 icon: 'error',
                 customClass: {
                     confirmButton: 'btn btn-danger'

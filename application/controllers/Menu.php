@@ -10,6 +10,7 @@ class Menu extends CI_Controller {
 		$this->load->helper(array('form', 'url'));
 		$this->load->model('menu_model');
 		$this->load->model('validasiformulir_model');
+		$this->load->model('member_model');
 		$this->load->library('upload');
 
 		if ($this->input->is_ajax_request()) {
@@ -261,5 +262,302 @@ class Menu extends CI_Controller {
         $files = $this->db->get_where('disetujui_files', ['id_sop' => $id_sop])->result();
         echo json_encode($files);
         exit;
+    }
+    
+    public function get_revision_files($id_sop) {
+        header('Content-Type: application/json');
+        
+        $revision = $this->db->get_where('revisi_files', ['id_sop' => $id_sop])->row_array();
+        
+        if ($revision) {
+            // Format the response to include both system and original filenames
+            $files = [];
+            $file_types = ['surat_mandiri', 'formulir_etik', 'proposal', 'bukti_pembayaran'];
+            
+            foreach ($file_types as $type) {
+                $revisi_key = 'revisi_' . $type;
+                $original_key = 'original_' . $type;
+                
+                if (!empty($revision[$revisi_key])) {
+                    $files[] = [
+                        'type' => $type,
+                        'file_name' => $revision[$revisi_key],
+                        'original_name' => $revision[$original_key],
+                        'download_url' => base_url('uploads/revisions/' . $revision[$revisi_key])
+                    ];
+                }
+            }
+            echo json_encode($files);
+        } else {
+            echo json_encode([]);
+        }
+        exit;
+    }
+
+    public function update_revisi() {
+        header('Content-Type: application/json');
+    
+        try {
+            if (!$this->input->is_ajax_request()) {
+                throw new Exception('Invalid request method');
+            }
+    
+            $id_sop = $this->input->post('id_sop');
+            $status = $this->input->post('status');
+    
+            if (empty($id_sop) || empty($status)) {
+                throw new Exception('Missing required fields');
+            }
+    
+            $this->db->trans_start();
+    
+            // Prepare file upload configuration
+            $upload_path = FCPATH . 'uploads/revisi_files/';
+            if (!file_exists($upload_path)) {
+                if (!mkdir($upload_path, 0777, true)) {
+                    throw new Exception('Failed to create upload directory');
+                }
+            }
+    
+            if (!is_writable($upload_path)) {
+                throw new Exception('Upload directory is not writable');
+            }
+    
+            $config = [
+                'upload_path' => $upload_path,
+                'allowed_types' => 'pdf|doc|docx|xls|xlsx|jpg|jpeg|png',
+                'max_size' => 2048,
+                'overwrite' => TRUE
+            ];
+    
+            $this->load->library('upload', $config);
+    
+            $file_fields = [
+                'surat_mandiri' => 'revisi_surat_mandiri',
+                'formulir_etik' => 'revisi_formulir_etik',
+                'proposal' => 'revisi_proposal',
+                'bukti_pembayaran' => 'revisi_bukti_pembayaran'
+            ];
+    
+            $update_data = ['uploaded_at' => date('Y-m-d H:i:s')];
+    
+            foreach ($file_fields as $field => $db_column) {
+                if (isset($_FILES[$field]) && !empty($_FILES[$field]['name'])) {
+                    $new_filename = uniqid() . '_' . time() . '_' . preg_replace('/\s+/', '_', $_FILES[$field]['name']);
+                    $config['file_name'] = $new_filename;
+                    $this->upload->initialize($config);
+    
+                    if (!$this->upload->do_upload($field)) {
+                        throw new Exception('Upload error (' . $field . '): ' . $this->upload->display_errors('', ''));
+                    }
+    
+                    $upload_data = $this->upload->data();
+                    $update_data[$db_column] = $upload_data['file_name'];
+                    $update_data['original_' . $field] = $_FILES[$field]['name'];
+                }
+            }
+    
+            $this->db->where('id_sop', $id_sop);
+            $exists = $this->db->get('revisi_files')->row_array();
+    
+            if ($exists != null) {
+                $this->db->where('id_sop', $id_sop);
+                $this->db->update('revisi_files', $update_data);
+                $this->db->where('id_sop', $id_sop);
+                $this->db->update('sop_request', ['status' => 'sudah diperbaiki']);
+            } else {
+                $update_data['id_sop'] = $id_sop;
+                $this->db->insert('revisi_files', $update_data);
+            }
+    
+            $this->db->trans_complete();
+    
+            if ($this->db->trans_status() === FALSE) {
+                throw new Exception('Database transaction failed');
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Revisi berhasil diperbarui'
+            ]);
+    
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            log_message('error', 'Update revisi error: ' . $e->getMessage());
+            ob_clean(); // Clear buffer before sending JSON
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function formulir_detail($id_sop) {
+        $sop_details = $this->validasiformulir_model->getSopById($id_sop);
+        $member_details = $this->member_model->getMemberById($sop_details['id_members']);
+        $history = $this->validasiformulir_model->getHistoriById($id_sop);
+    
+        $formatted_history = [];
+        foreach ($history as $record) {
+            $key = $record['id']; 
+            if (!isset($formatted_history[$key])) {
+                $formatted_history[$key] = [
+                    'date' => date('d M Y, H:i', strtotime($record['created_at'])),
+                    'badge_class' => $this->_getBadgeClass($record['status']),
+                    'badge_icon' => $this->_getStatusIcon($record['status']),
+                    'title' => $this->_getStatusTitle($record['status']),
+                    'review_message' => $record['pesan'], 
+                    'review_files' => [], 
+                    'revision_files' => [], 
+                    'approval_files' => [], 
+                    'has_review' => !empty($record['pesan']),
+                    'has_revision' => $record['id_revisi_files'], 
+                    'has_approved' => $record['id_persetujuan_files'], 
+                ];
+            }
+        
+            // Tambahkan file ke array review_files
+            if (!empty($record['file_name_pesan'])) {
+                $formatted_history[$key]['review_files'][] = [
+                    'name' => $record['file_name_pesan'],
+                    'path' => $this->_getFilePath(['file_name_pesan' => $record['file_name_pesan']]),
+                ];
+            }
+
+            $approvalFilePaths = array_column($formatted_history[$key]['approval_files'], 'path'); // Ambil path file yang sudah ada
+            if (!empty($record['file_name_persetujuan']) && !in_array($this->_getFilePath(['file_name_persetujuan' => $record['file_name_persetujuan']]), $approvalFilePaths)) {
+                $formatted_history[$key]['approval_files'][] = [
+                    'name' => $record['file_name_persetujuan'],
+                    'path' => $this->_getFilePath(['file_name_persetujuan' => $record['file_name_persetujuan']]),
+                ];
+            }
+        
+            //
+            $revisionFilePaths = array_column($formatted_history[$key]['revision_files'], 'path'); // Ambil path file yang sudah ada
+            if (!empty($record['revisi_surat_mandiri']) && !in_array($this->_getFilePath(['revisi_surat_mandiri' => $record['revisi_surat_mandiri']]), $revisionFilePaths)) {
+                $formatted_history[$key]['revision_files'][] = [
+                    'name' => $record['revisi_surat_mandiri'],
+                    'path' => $this->_getFilePath(['revisi_surat_mandiri' => $record['revisi_surat_mandiri']]),
+                ];
+            }
+            if (!empty($record['revisi_formulir_etik']) && !in_array($this->_getFilePath(['revisi_formulir_etik' => $record['revisi_formulir_etik']]), $revisionFilePaths)) {
+                $formatted_history[$key]['revision_files'][] = [
+                    'name' => $record['revisi_formulir_etik'],
+                    'path' => $this->_getFilePath(['revisi_formulir_etik' => $record['revisi_formulir_etik']]),
+                ];
+            }
+            if (!empty($record['revisi_proposal']) && !in_array($this->_getFilePath(['revisi_proposal' => $record['revisi_proposal']]), $revisionFilePaths)) {
+                $formatted_history[$key]['revision_files'][] = [
+                    'name' => $record['revisi_proposal'],
+                    'path' => $this->_getFilePath(['revisi_proposal' => $record['revisi_proposal']]),
+                ];
+            }
+            if (!empty($record['revisi_bukti_pembayaran']) && !in_array($this->_getFilePath(['revisi_bukti_pembayaran' => $record['revisi_bukti_pembayaran']]), $revisionFilePaths)) {
+                $formatted_history[$key]['revision_files'][] = [
+                    'name' => $record['revisi_bukti_pembayaran'],
+                    'path' => $this->_getFilePath(['revisi_bukti_pembayaran' => $record['revisi_bukti_pembayaran']]),
+                ];
+            }
+        
+            // Periksa apakah ada revision_files untuk mengaktifkan has_revision
+            if (!empty($formatted_history[$key]['revision_files'])) {
+                $formatted_history[$key]['has_revision'] = true;
+            }
+        
+        }
+    
+        $data = [
+            'page' => 'menu',
+            'sop' => $sop_details,
+            'member' => $member_details,
+            'history' => array_values($formatted_history), // Reset kunci array untuk view
+        ];
+    
+        $this->load->view('layout/header_menu', $data);
+        $this->load->view('menu/formulir_detail', $data);
+        $this->load->view('layout/footer_menu');
+    }
+
+    private function getStatusFromFiles($id_sop) {
+        // Ambil semua data dari tabel sop_request_histori berdasarkan id_sop
+        $this->db->select('status, pesan, created_at') // Pilih kolom yang diperlukan
+                 ->from('sop_request_histori')
+                 ->where('id_sop', $id_sop)
+                 ->order_by('created_at', 'DESC'); // Urutkan berdasarkan waktu terbaru
+        $query = $this->db->get();
+    
+        if ($query->num_rows() > 0) {
+            return $query->result_array(); // Kembalikan semua baris sebagai array
+        }
+        
+        return []; // Kembalikan array kosong jika tidak ada data
+    }
+    
+    // private function getStatusFromFiles($record) {
+    //     if (!empty($record['file_name_persetujuan'])) {
+    //         return 'disetujui'; // Permohonan Disetujui
+    //     } elseif (!empty($record['revisi_surat_mandiri']) || 
+    //               !empty($record['revisi_formulir_etik']) || 
+    //               !empty($record['revisi_proposal']) || 
+    //               !empty($record['revisi_bukti_pembayaran'])) {
+    //         return 'belum diperbaiki'; // Revisi Diperlukan
+    //     } elseif (!empty($record['file_name_pesan'])) {
+    //         return 'sedang diperiksa'; // Permohonan Direview
+    //     }
+    //     return 'belum diperiksa'; // Permohonan Diajukan
+    // }
+    
+    
+    private function _getBadgeClass($status) {
+        $classes = [
+            'belum diperiksa' => 'bg-secondary',
+            'sedang diperiksa' => 'bg-info',
+            'belum diperbaiki' => 'bg-warning',
+            'ditolak' => 'bg-danger',
+            'disetujui' => 'bg-success'
+        ];
+        return $classes[$status] ?? 'bg-primary';
+    }
+    
+    private function _getStatusIcon($status) {
+        $icons = [
+            'belum diperiksa' => 'file-earmark-text', 
+            'sedang diperiksa' => 'eye',           
+            'belum diperbaiki' => 'pencil',         
+            'sudah diperbaiki' => 'upload',         
+            'ditolak' => 'x-circle',             
+            'disetujui' => 'check-circle'         
+        ];
+        return $icons[$status] ?? 'circle'; // Default icon
+    }
+    
+    
+    private function _getStatusTitle($status) {
+        $titles = [
+            'belum diperiksa' => 'Permohonan Diajukan',
+            'sedang diperiksa' => 'Permohonan Direview',
+            'belum diperbaiki' => 'Revisi Diperlukan',
+            'sudah diperbaiki' => 'Revisi Diajukan',
+            'ditolak' => 'Permohonan Ditolak',
+            'disetujui' => 'Permohonan Disetujui'
+        ];
+        return $titles[$status] ?? 'Status Update';
+    }
+    
+    private function _getFilePath($record) {
+        if (!empty($record['file_name_persetujuan'])) {
+            return 'disetujui/' . $record['file_name_persetujuan'];
+        } elseif (!empty($record['file_name_pesan'])) {
+            return 'uploads/pesan_files/' . $record['file_name_pesan'];
+        } elseif (!empty($record['revisi_surat_mandiri'])) {
+            return 'uploads/revisi_files/' . $record['revisi_surat_mandiri'];
+        } elseif (!empty($record['revisi_formulir_etik'])) {
+            return 'uploads/revisi_files/' . $record['revisi_formulir_etik'];
+        } elseif (!empty($record['revisi_proposal'])) {
+            return 'uploads/revisi_files/' . $record['revisi_proposal'];
+        } elseif (!empty($record['revisi_bukti_pembayaran'])) {
+            return 'uploads/revisi_files/' . $record['revisi_bukti_pembayaran'];
+        }
+        return null;
     }
 }
