@@ -37,15 +37,16 @@
                        <ul>
                            <li><i class="bx bx-chevron-right"></i><a href="<?= base_url('bagan_alir') ?>">Bagan Alir
                                </a></li>
-                           <li><i class="bx bx-chevron-right"></i><a href="#">Panduan Pengguna untuk Peneliti</a></li>
-                           <li><i class="bx bx-chevron-right"></i><a href="#">Panduan Pengguna Invited Reviewer</a></li>
+                           <li><i class="bx bx-chevron-right"></i>
+                               <a href="<?= base_url() ?>">Panduan Pengguna untuk Peneliti</a>
+                           </li>
                            <li><i class="bx bx-chevron-right"></i><a href="<?= base_url('tarif') ?>">Tarif</a></li>
-                           <li><i class="bx bx-chevron-right"></i><a href="#">Estimasi Waktu</a></li>
-                           <li><i class="bx bx-chevron-right"></i><a href="#">Reviewer</a></li>
-                           <li><i class="bx bx-chevron-right"></i><a href="#">Persyaratan Etik</a></li>
-                           <li><i class="bx bx-chevron-right"></i><a href="#">Prosedur Alur Perpanjangan Surat
-                                   Pernyataan Etik</a></li>
-                           <li><i class="bx bx-chevron-right"></i><a href="#">Panduan Pengguna Lupa Password</a></li>
+                           <li><i class="bx bx-chevron-right"></i><a href="<?= base_url() ?>estimasi_waktu">Estimasi
+                                   Waktu</a></li>
+                           <li><i class="bx bx-chevron-right"></i><a href="<?= base_url() ?>perpanjangan">Perpanjangan
+                                   Surat Kelayakan Etik </a></li>
+                           <li><i class="bx bx-chevron-right"></i><a href="<?= base_url() ?>lupa_password">Panduan
+                                   Pengguna Lupa Password</a></li>
                        </ul>
                    </div>
 
@@ -53,8 +54,7 @@
                        <h4>Profile</h4>
                        <ul>
                            <li><i class="bx bx-chevron-right"></i>
-                               <a class="nav-link scrollto <?= $page=='home' ? 'active' : '' ?>"
-                                   href="<?= base_url('sejarah') ?>">Sejarah</a>
+                               <a href="<?= base_url() ?>sejarah">Sejarah</a>
                            </li>
                            <li><i class="bx bx-chevron-right"></i>
                                <a href="<?= base_url('struktur_organisasi') ?>">Struktur Organisasi</a>

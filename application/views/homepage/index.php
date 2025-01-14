@@ -58,13 +58,13 @@
                       keberterimaan secara etik suatu rangkaian proses penelitian, terutama untuk melindungi subjek
                       penelitian. [Ketua Komisi Etik UPI Prof Budi Mulyanti, M.Si]</p>
 
-                  <div class="alert alert-warning text-center" role="alert">
+                  <!-- <div class="alert alert-warning text-center" role="alert">
                       <i class="bi bi-exclamation-triangle-fill"></i> Alternatif untuk melakukan
                       pengajuan layanan silahkan kunjungi link berikut.
                       <br><a
                           href="https://docs.google.com/forms/d/e/1FAIpQLSfcuYD9WGyGCq4EcAU-qdt79NwKA0VNC3PgFuSYx-8yJo1NVw/viewform"
                           target="_blank" class="btn btn-danger mt-2"><i class="bi bi-pencil-square"></i> Ajukan</a>
-                  </div>
+                  </div> -->
 
               </div>
           </div>
@@ -86,49 +86,49 @@
                   <div class="col-lg-3 col-md-4">
                       <div class="icon-box" data-aos="zoom-in" data-aos-delay="50">
                           <i class="bi bi-book-half" style="color: #ffbb2c;"></i>
-                          <h3><a href="">Bagan Alir</a></h3>
+                          <h3><a href="<?= base_url() ?>bagan_alir">Bagan Alir</a></h3>
                       </div>
                   </div>
                   <div class="col-lg-3 col-md-4 mt-4 mt-md-0">
                       <div class="icon-box" data-aos="zoom-in" data-aos-delay="100">
                           <i class="bi bi-book-half" style="color: #5578ff;"></i>
-                          <h3><a href="">Panduan Pengguna untuk Peneliti</a></h3>
+                          <h3><a href="<?= base_url() ?>">Panduan Pengguna untuk Peneliti</a></h3>
                       </div>
                   </div>
                   <div class="col-lg-3 col-md-4 mt-4 mt-md-0">
                       <div class="icon-box" data-aos="zoom-in" data-aos-delay="150">
                           <i class="bi bi-book-half" style="color: #e80368;"></i>
-                          <h3><a href="">Panduan Pengguna Invited Reviewer</a></h3>
+                          <h3><a href="<?= base_url() ?>tarif">Tarif</a></h3>
                       </div>
                   </div>
                   <div class="col-lg-3 col-md-4 mt-4 mt-lg-0">
                       <div class="icon-box" data-aos="zoom-in" data-aos-delay="200">
                           <i class="bi bi-book-half" style="color: #e361ff;"></i>
-                          <h3><a href="">Pedoman Penyusunan Lembar Penjelasan</a></h3>
+                          <h3><a href="<?= base_url() ?>estimasi_waktu">Estimasi Waktu</a></h3>
                       </div>
                   </div>
                   <div class="col-lg-3 col-md-4 mt-4">
                       <div class="icon-box" data-aos="zoom-in" data-aos-delay="250">
                           <i class="bi bi-book-half" style="color: #47aeff;"></i>
-                          <h3><a href="">Persyaratan Etik</a></h3>
+                          <h3><a href="<?= base_url() ?>perpanjangan">Perpanjangan Surat Kelayakan Etik </a></h3>
                       </div>
                   </div>
                   <div class="col-lg-3 col-md-4 mt-4">
                       <div class="icon-box" data-aos="zoom-in" data-aos-delay="300">
                           <i class="bi bi-book-half" style="color: #ffa76e;"></i>
-                          <h3><a href="">Pelatihan</a></h3>
+                          <h3><a href="<?= base_url() ?>lupa_password">Panduan Pengguna Lupa Password</a></h3>
                       </div>
                   </div>
                   <div class="col-lg-3 col-md-4 mt-4">
                       <div class="icon-box" data-aos="zoom-in" data-aos-delay="350">
                           <i class="bi bi-book-half" style="color: #11dbcf;"></i>
-                          <h3><a href="">Tarif</a></h3>
+                          <h3><a href="<?= base_url() ?>sejarah">Sejarah</a></h3>
                       </div>
                   </div>
                   <div class="col-lg-3 col-md-4 mt-4">
                       <div class="icon-box" data-aos="zoom-in" data-aos-delay="400">
                           <i class="bi bi-book-half" style="color: #6d66ca;"></i>
-                          <h3><a href="">Panduan Pengguna Lupa Password</a></h3>
+                          <h3><a href="<?= base_url() ?>struktur_organisasi">Struktur Organisasi</a></h3>
                       </div>
                   </div>
               </div>

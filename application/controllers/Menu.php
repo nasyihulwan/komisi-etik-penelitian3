@@ -504,7 +504,7 @@ class Menu extends CI_Controller {
         }
     
         $data = [
-            'page' => 'menu',
+            'page' => '',
             'sop' => $sop_details,
             'member' => $member_details,
             'history' => array_values($formatted_history), // Reset kunci array untuk view

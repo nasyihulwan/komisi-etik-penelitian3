@@ -197,7 +197,7 @@
                         $item = isset($history[0]) ? $history[0] : null;
 
                         // Periksa apakah elemen pertama memenuhi kondisi
-                        if ($item && $item['has_submitted_revision']): ?>
+                        if ($item && !$item['has_submitted_revision'] && !$item['has_approved']): ?>
                         <span class="badge bg-info text-white" style="cursor: pointer;"
                             onclick="showMessage('<?= htmlspecialchars($sop['pesan'], ENT_QUOTES) ?>', <?= $sop['id_sop'] ?>)">
                             Upload Revisi
