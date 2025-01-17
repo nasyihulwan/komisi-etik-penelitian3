@@ -52,7 +52,8 @@
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">Nama Pengaju</th>
-                            <th scope="col">Judul</th>
+                            <th scope="col">Judul dalam Bahasa Indonesia</th>
+                            <th scope="col">Judul dalam Bahasa Inggris</th>
                             <th scope="col">Kategori</th>
                             <th scope="col">Sumber Dana</th>
                             <th scope="col">Pemberi Hibah</th>
@@ -60,6 +61,7 @@
                             <th scope="col">Formulir Etik</th>
                             <th scope="col">Proposal</th>
                             <th scope="col">Bukti Pembayaran</th>
+                            <th scope="col">Download Semua File</th>
                             <th scope="col">Status</th>
                             <th scope="col">Pesan</th>
                             <th scope="col">Dibuat</th>
@@ -75,6 +77,7 @@
                             <th scope="row"><?= $no++ ?></th>
                             <td><?= $r->nama ?></td>
                             <td><?= $r->judul ?></td>
+                            <td><?= $r->judul_inggris ?></td>
                             <td><?= $r->kategori ?></td>
                             <td><?= $r->sumber_dana ?></td>
                             <td><?= $r->pemberi_hibah ?></td>
@@ -82,20 +85,37 @@
                                 <a href="<?= base_url() ?>uploads/<?= $r->surat_pernyataan_mandiri ?>" download>
                                     <span class="badge bg-secondary" style="cursor: pointer;">Unduh</span>
                                 </a>
+                                <a href="<?= base_url() ?>uploads/<?= $r->surat_pernyataan_mandiri ?>" target="_blank">
+                                    <span class="badge bg-primary" style="cursor: pointer;">Lihat</span>
+                                </a>
                             </td>
                             <td class="text-center">
                                 <a href="<?= base_url() ?>uploads/<?= $r->formulir_etik ?>" download>
                                     <span class="badge bg-secondary" style="cursor: pointer;">Unduh</span>
+                                </a>
+                                <a href="<?= base_url() ?>uploads/<?= $r->formulir_etik ?>" target="_blank">
+                                    <span class="badge bg-primary" style="cursor: pointer;">Lihat</span>
                                 </a>
                             </td>
                             <td class="text-center">
                                 <a href="<?= base_url() ?>uploads/<?= $r->proposal ?>" download>
                                     <span class="badge bg-secondary" style="cursor: pointer;">Unduh</span>
                                 </a>
+                                <a href="<?= base_url() ?>uploads/<?= $r->proposal ?>" target="_blank">
+                                    <span class="badge bg-primary" style="cursor: pointer;">Lihat</span>
+                                </a>
                             </td>
                             <td class="text-center">
                                 <a href="<?= base_url() ?>uploads/<?= $r->bukti_pembayaran ?>" download>
                                     <span class="badge bg-secondary" style="cursor: pointer;">Unduh</span>
+                                </a>
+                                <a href="<?= base_url() ?>uploads/<?= $r->bukti_pembayaran ?>" target="_blank">
+                                    <span class="badge bg-primary" style="cursor: pointer;">Lihat</span>
+                                </a>
+                            </td>
+                            <td class="text-center">
+                                <a href="<?= base_url('menu/download_all_files/'.$r->id_sop) ?>">
+                                    <span class="badge bg-success" style="cursor: pointer;">Download Semua File</span>
                                 </a>
                             </td>
 

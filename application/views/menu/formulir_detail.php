@@ -164,10 +164,13 @@
                         </div>
 
                         <div class="proposal-section">
-                            <div class="proposal-section-title"><b>Judul</b></div>
+                            <div class="proposal-section-title"><b>Judul dalam Bahasa Indonesia</b></div>
                             <div class="proposal-section-content"><?= $sop['judul'] ?></div>
                         </div>
-
+                        <div class="proposal-section">
+                            <div class="proposal-section-title"><b>Judul dalam Bahasa Inggris</b></div>
+                            <div class="proposal-section-content"><?= $sop['judul_inggris'] ?></div>
+                        </div>
                         <div class="proposal-section">
                             <div class="proposal-section-title"><b>Sumber Dana</b></div>
                             <div class="proposal-section-content"><?= $sop['sumber_dana'] ?></div>
@@ -195,15 +198,13 @@
                         <?php
                         // Ambil elemen pertama dari $history (jika ada)
                         $item = isset($history[0]) ? $history[0] : null;
-
                         // Periksa apakah elemen pertama memenuhi kondisi
-                        if ($item && !$item['has_submitted_revision'] && !$item['has_approved']): ?>
+                        if ($item['status'] == 'belum diperbaiki' && !$item['has_submitted_revision'] && !$item['has_approved'] ): ?>
                         <span class="badge bg-info text-white" style="cursor: pointer;"
                             onclick="showMessage('<?= htmlspecialchars($sop['pesan'], ENT_QUOTES) ?>', <?= $sop['id_sop'] ?>)">
                             Upload Revisi
                         </span>
                         <?php endif; ?>
-
                     </div>
                     <div class="card-body">
                         <div class="timeline">

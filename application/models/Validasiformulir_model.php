@@ -28,6 +28,7 @@ class Validasiformulir_model extends CI_Model {
     public function getHistoriById($id_sop) {
         $this->db->select('
             sop_request_histori.*,
+            sop_request.status as sop_status,
             pesan_files.file_name as file_name_pesan,
             revisi_files.id as id_revisi_files,
             revisi_files.revisi_surat_mandiri,
@@ -39,6 +40,11 @@ class Validasiformulir_model extends CI_Model {
         ');
         
         $this->db->from('sop_request_histori');
+
+        $this->db->join('sop_request', 
+            'sop_request_histori.id_sop = sop_request.id_sop', 
+            'left'
+        );
         
         $this->db->join('pesan_files', 
             'sop_request_histori.id = pesan_files.id_histori', 

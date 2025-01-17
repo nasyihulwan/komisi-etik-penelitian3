@@ -32,8 +32,8 @@
                         <hr>
                         <form action="" method="POST" class="needs-validation" enctype="multipart/form-data">
                             <div class="row my-3">
-                                <label for="judul" class="col-sm-3 col-form-label">Judul Penelitian<b
-                                        class="text-danger">*</b></label>
+                                <label for="judul" class="col-sm-3 col-form-label">Judul Penelitian dalam Bahasa
+                                    Indonesia<b class="text-danger">*</b></label>
                                 <div class="col-sm-9">
                                     <div class="form-floating mb-3">
                                         <input type="text"
@@ -45,6 +45,23 @@
                                             <?= form_error('judul'); ?>
                                         </div>
                                         <label for="judul">Masukkan Judul Penelitian</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row my-3">
+                                <label for="judul_inggris" class="col-sm-3 col-form-label">Judul Penelitian dalam Bahasa
+                                    Inggris<b class="text-danger">*</b></label>
+                                <div class="col-sm-9">
+                                    <div class="form-floating mb-3">
+                                        <input type="text"
+                                            class="form-control <?= $this->session->flashdata('judul_inggris_invalid')||form_error('judul_inggris') ? 'is-invalid' : ''; ?>"
+                                            id="judul_inggris" name="judul_inggris" placeholder="Judul Penelitian"
+                                            value="<?= set_value('judul_inggris'); ?>">
+                                        <div class="invalid-feedback">
+                                            <?= $this->session->flashdata('judul_inggris_invalid'); ?>
+                                            <?= form_error('judul_inggris'); ?>
+                                        </div>
+                                        <label for="judul">Masukkan Judul Penelitian dalam Bahasa Inggris</label>
                                     </div>
                                 </div>
                             </div>

@@ -46,7 +46,6 @@ class Menu extends CI_Controller {
 
 	public function sop_request()
 	{
-		
 		$rules = [
 			[
 				'field' => 'judul',
@@ -71,6 +70,7 @@ class Menu extends CI_Controller {
 
 	private function _sop_process() {
 		$judul = $this->input->post('judul');
+		$judul_inggris = $this->input->post('judul_inggris');
 		$kategori = $this->input->post('kategori');
 		$sumber_dana = $this->input->post('sumber_dana');
 		$pemberi_hibah = $this->input->post('pemberi_hibah');
@@ -106,6 +106,7 @@ class Menu extends CI_Controller {
 		if (!empty($uploadData)) {
             $data = array(
                 'judul' => $judul,
+                'judul_inggris' => $judul_inggris,
                 'kategori' => $kategori,
                 'sumber_dana' => $sumber_dana,
                 'pemberi_hibah' => $pemberi_hibah,
@@ -450,6 +451,7 @@ class Menu extends CI_Controller {
                     'has_revision' => !empty($record['pesan']),
                     'has_submitted_revision' => $record['id_revisi_files'], 
                     'has_approved' => $record['id_persetujuan_files'], 
+                    'status' => $record['sop_status']
                 ];
             }
         
@@ -504,7 +506,7 @@ class Menu extends CI_Controller {
         }
     
         $data = [
-            'page' => '',
+            'page' => 'validasi_formulir',
             'sop' => $sop_details,
             'member' => $member_details,
             'history' => array_values($formatted_history), // Reset kunci array untuk view
@@ -580,5 +582,44 @@ class Menu extends CI_Controller {
             return 'uploads/revisi_files/' . $record['revisi_bukti_pembayaran'];
         }
         return null;
+    }
+    
+    public function download_all_files($id_sop) {
+        // Load zip library
+        $this->load->library('zip');
+        
+        // Get the submission data with member name using join
+        $this->db->select('sop_request.*, members.nama as member_nama');
+        $this->db->from('sop_request');
+        $this->db->join('members', 'members.id_members = sop_request.id_members');
+        $this->db->where('sop_request.id_sop', $id_sop);
+        $submission = $this->db->get()->row();
+        
+        if (!$submission) {
+            show_error('Data not found', 404);
+            return;
+        }
+        
+        // Create folder name using member's name (sanitized)
+        $folder_name = preg_replace('/[^A-Za-z0-9_\-]/', '_', $submission->member_nama);
+        
+        // Array of files to download
+        $files = [
+            'surat_pernyataan_mandiri' => $submission->surat_pernyataan_mandiri,
+            'formulir_etik' => $submission->formulir_etik,
+            'proposal' => $submission->proposal,
+            'bukti_pembayaran' => $submission->bukti_pembayaran
+        ];
+        
+        // Add each file to the zip
+        foreach ($files as $type => $filename) {
+            $file_path = FCPATH . 'uploads/' . $filename;
+            if (file_exists($file_path)) {
+                $this->zip->read_file($file_path, $folder_name . '/' . $filename);
+            }
+        }
+        
+        // Download the zip file
+        $this->zip->download($folder_name . '_files.zip');
     }
 }

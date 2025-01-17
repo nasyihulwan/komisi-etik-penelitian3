@@ -61,15 +61,6 @@
                     2. Menjadi lembaga dalam koordinasi kantor Wakil Rektor Bidang Riset, Usaha, dan Kerjasama UPI yang
                     menyumbangkan IGU bagi UPI.
                 </p>
-
-                <div class="alert alert-warning text-center" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill"></i> Website masih dalam pengembangan, untuk melakukan
-                    pengajuan layanan silahkan kunjungi link berikut.
-                    <br><a
-                        href="https://docs.google.com/forms/d/e/1FAIpQLSfcuYD9WGyGCq4EcAU-qdt79NwKA0VNC3PgFuSYx-8yJo1NVw/viewform"
-                        target="_blank" class="btn btn-danger mt-2"><i class="bi bi-pencil-square"></i> Ajukan</a>
-                </div>
-
             </div>
         </div>
 
