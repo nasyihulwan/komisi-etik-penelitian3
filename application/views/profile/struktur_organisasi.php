@@ -47,7 +47,7 @@
                         <td>Prof. Dr. Budi Mulyanti, M.T.</td>
                     </tr>
                     <tr>
-                        <td>Sekertaris</td>
+                        <td>Sekretaris</td>
                         <td>:</td>
                         <td>dr. Pipit Pitriani, M.Kes, Ph.D.</td>
                     </tr>
@@ -59,7 +59,7 @@
                             <ul>2. Prof. Dr. Elly Malihah, M.Si.</ul>
                             <ul>3. Prof. Dr. Ida Hamidah, M.Si.</ul>
                             <ul>4. Prof. Dr. Hamidie Ronald Daniel Ray, M.Pd., Ph.D.</ul>
-                            <ul>5. Prof. Vina Andriany, Ph.D.</ul>
+                            <ul>5. Prof. Vina Adriany, Ph.D.</ul>
                             <ul>6. Prof. Dr. Topik Hidayat, M.Si., Ph.D.</ul>
                         </td>
                     </tr>
