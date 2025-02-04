@@ -1,6 +1,5 @@
   <!-- ======= Hero Section ======= -->
   <section id="hero">
-
       <div class="container">
           <div class="row justify-content-between">
               <div class="col-lg-6 pt-6 pt-lg-0 order-2 order-lg-1 d-flex align-items-center">
@@ -11,7 +10,7 @@
                       <h2>Universitas Pendidikan Indonesia</h2>
                   </div>
               </div>
-          </div>
+          </div>`
       </div>
 
       <svg class="hero-waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
