@@ -200,6 +200,7 @@ class Auth extends CI_Controller {
 				'kota' => $kota,
 				'negara' => $negara,
 				'hp' => $hp,
+				'level' => 'member',
 				'org' => $org
 			);
 			
