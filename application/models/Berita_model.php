@@ -18,11 +18,12 @@ class Berita_model extends CI_Model {
         return $query->row_array();
     }
     
-    public function getArsipBerita() {
+    public function getArsipBerita($bulan) {
         $this->db->select("DATE_FORMAT(datetime, '%M %Y') AS bulan_tahun, 
                            DATE_FORMAT(datetime, '%Y-%m') AS periode, 
                            COUNT(*) AS jumlah_berita");
         $this->db->from('berita');
+        $this->db->where('bulan_tahun', $bulan);
         $this->db->group_by('bulan_tahun, periode');
         $this->db->order_by('periode', 'DESC');
         

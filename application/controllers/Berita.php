@@ -39,4 +39,17 @@ class Berita extends CI_Controller {
         $this->load->view('berita/detail', $data);
         $this->load->view('layout/footer_home');
     }
+
+    public function arsip($bulan)
+    {
+        $data['page'] = 'berita';
+        $this->load->helper('text');
+        $this->load->model('Berita_model');
+
+        $data['berita'] = $this->Berita_model->getArsipBerita($bulan);
+
+        $this->load->view('layout/header_home', $data);
+        $this->load->view('berita/arsip', $data);
+        $this->load->view('layout/footer_home');
+    }
 }
