@@ -10,7 +10,7 @@
                       <h2>Universitas Pendidikan Indonesia</h2>
                   </div>
               </div>
-          </div>`
+          </div>
       </div>
 
       <svg class="hero-waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
